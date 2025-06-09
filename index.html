@@ -56,13 +56,13 @@
 
     <!-- Opening Screen -->
     <div id="opening-screen" class="overlay-screen active" onclick="this.classList.add('fade-out')">
-        <img src="assets/openingandclosingcredits/botbuilderopeningscene.jpg" class="max-w-xs md:max-w-sm rounded-lg">
+        <video src="assets/openingandclosingcredits/BotBuilderOpeningScene.mp4" autoplay loop playsinline class="max-w-xs md:max-w-sm rounded-lg"></video>
         <p class="text-xl mt-4 text-gray-300">Click anywhere to continue</p>
     </div>
     
     <!-- Closing Screen -->
     <div id="closing-screen" class="overlay-screen">
-        <video src="assets/openingandclosingcredits/closingcredits.mp4" controls playsinline class="max-w-xs md:max-w-sm rounded-lg"></video> Watch Me for Credit roll and Tips at the end! <class="max-w-xs md:max-w-sm rounded-lg"></video>
+        <video src="https://i.imgur.com/p89ENIV.mp4" autoplay loop playsinline class="max-w-xs md:max-w-sm rounded-lg"></video>
         <p class="text-xl mt-4 text-gray-300">Your bot files have been downloaded!</p>
         <button onclick="startOver()" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">Create Another Bot</button>
     </div>
@@ -134,6 +134,20 @@
                     <div>
                         <label for="relationships" class="block mb-2 text-sm font-medium text-gray-300">Relationships (Optional)</label>
                         <textarea id="relationships" rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Best friend: Alex\nRival: Jordan\nMentor: Dr. Smith"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Custom Sections -->
+                <div class="mt-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-indigo-400">Custom Sections</h3>
+                        <button type="button" onclick="addCustomSection()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                            Add Custom Section
+                        </button>
+                    </div>
+                    <div id="custom-sections-container" class="space-y-4">
+                        <!-- Custom sections will be added here dynamically -->
                     </div>
                 </div>
             </section>
@@ -320,9 +334,71 @@
 
     <script>
         // --- UI & NAVIGATION ---
+        let customSectionCounter = 0;
+
         function showClosingScreen() {
              const closingScreen = document.getElementById('closing-screen');
              if (closingScreen) closingScreen.classList.add('active');
+        }
+
+        function addCustomSection() {
+            customSectionCounter++;
+            const container = document.getElementById('custom-sections-container');
+            
+            const sectionDiv = document.createElement('div');
+            sectionDiv.className = 'bg-gray-700 p-4 rounded-lg';
+            sectionDiv.id = `custom-section-${customSectionCounter}`;
+            
+            sectionDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="text-md font-medium text-gray-300">Custom Section #${customSectionCounter}</h4>
+                    <button type="button" onclick="removeCustomSection(${customSectionCounter})" class="bg-red-600 hover:bg-red-700 text-white font-medium py-1 px-3 rounded text-sm transition-colors">
+                        Remove
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-300">Section Name</label>
+                        <input type="text" id="custom-name-${customSectionCounter}" class="bg-gray-600 border border-gray-500 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Background, Skills, Equipment">
+                    </div>
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-300">Section Content</label>
+                        <textarea id="custom-content-${customSectionCounter}" rows="3" class="bg-gray-600 border border-gray-500 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="Enter your custom content here..."></textarea>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(sectionDiv);
+            
+            // Add event listeners for preview updates
+            document.getElementById(`custom-name-${customSectionCounter}`).addEventListener('input', updateCharacterPreview);
+            document.getElementById(`custom-content-${customSectionCounter}`).addEventListener('input', updateCharacterPreview);
+        }
+
+        function removeCustomSection(sectionId) {
+            const section = document.getElementById(`custom-section-${sectionId}`);
+            if (section) {
+                section.remove();
+                updateCharacterPreview();
+            }
+        }
+
+        function getCustomSections() {
+            const sections = {};
+            const container = document.getElementById('custom-sections-container');
+            const sectionDivs = container.querySelectorAll('[id^="custom-section-"]');
+            
+            sectionDivs.forEach(div => {
+                const id = div.id.split('-')[2];
+                const nameInput = document.getElementById(`custom-name-${id}`);
+                const contentInput = document.getElementById(`custom-content-${id}`);
+                
+                if (nameInput && contentInput && nameInput.value.trim()) {
+                    sections[nameInput.value.trim()] = contentInput.value.trim();
+                }
+            });
+            
+            return sections;
         }
 
         function startOver() {
@@ -348,6 +424,17 @@
             const description = document.getElementById('description').value || 'No description';
             const personality = document.getElementById('personality').value || 'No personality defined';
             const tags = document.getElementById('tags').value || 'No tags';
+            const customSections = getCustomSections();
+            
+            let customSectionsHtml = '';
+            if (Object.keys(customSections).length > 0) {
+                customSectionsHtml = '<div class="mt-3 pt-3 border-t border-gray-600"><span class="font-medium text-gray-300">Custom Sections:</span>';
+                for (const [name, content] of Object.entries(customSections)) {
+                    const truncatedContent = content.length > 50 ? content.substring(0, 50) + '...' : content;
+                    customSectionsHtml += `<div class="mt-1"><span class="text-xs font-medium text-indigo-400">${name}:</span> <span class="text-xs text-gray-400">${truncatedContent}</span></div>`;
+                }
+                customSectionsHtml += '</div>';
+            }
             
             const preview = document.getElementById('character-preview');
             preview.innerHTML = `
@@ -364,6 +451,7 @@
                         <span class="font-medium text-gray-300">Personality:</span>
                         <p class="text-gray-400">${personality.length > 100 ? personality.substring(0, 100) + '...' : personality}</p>
                     </div>
+                    ${customSectionsHtml}
                 </div>
             `;
         }
@@ -391,9 +479,27 @@
                             document.getElementById('mes_example').value = charData.mes_example || '';
                             document.getElementById('tags').value = Array.isArray(charData.tags) ? charData.tags.join(', ') : '';
                             document.getElementById('post_history_instructions').value = charData.post_history_instructions || '';
+                            document.getElementById('relationships').value = charData.relationships || '';
                             
                             if (charData.alternate_greetings && Array.isArray(charData.alternate_greetings)) {
                                 document.getElementById('alternate_greetings').value = charData.alternate_greetings.join('\\n\\n');
+                            }
+                            
+                            // Clear existing custom sections
+                            const container = document.getElementById('custom-sections-container');
+                            container.innerHTML = '';
+                            customSectionCounter = 0;
+                            
+                            // Load custom sections
+                            if (charData.custom_fields && typeof charData.custom_fields === 'object') {
+                                for (const [name, content] of Object.entries(charData.custom_fields)) {
+                                    if (name && content) {
+                                        addCustomSection();
+                                        const currentId = customSectionCounter;
+                                        document.getElementById(`custom-name-${currentId}`).value = name;
+                                        document.getElementById(`custom-content-${currentId}`).value = content;
+                                    }
+                                }
                             }
                             
                             updateCharacterPreview();
@@ -419,6 +525,7 @@
         function generateSillyTavernCard() {
             const alternateGreetings = document.getElementById('alternate_greetings').value.trim();
             const tagsStr = document.getElementById('tags').value.trim();
+            const customSections = getCustomSections();
             
             const cardData = {
                 spec: 'chara_card_v2',
@@ -437,7 +544,8 @@
                     creator: document.getElementById('creator').value,
                     character_version: "1.0",
                     alternate_greetings: alternateGreetings ? alternateGreetings.split('\\n\\n').filter(g => g.trim()) : [],
-                    relationships: document.getElementById('relationships').value
+                    relationships: document.getElementById('relationships').value,
+                    custom_fields: customSections
                 }
             };
             return JSON.stringify(cardData, null, 2);
@@ -554,10 +662,17 @@ async def get_ai_response(user_prompt, memory, mode="chat"):
         "novel": "Respond in third person narrative style. Example: ${charName} smiled at the suggestion. \\"That sounds great,\\" they said."
     }
     
+    # Load custom fields from character data
+    custom_fields_text = ""
+    if character_data.get('custom_fields'):
+        custom_fields_text = "\\n\\nAdditional Character Information:\\n"
+        for field_name, field_content in character_data['custom_fields'].items():
+            custom_fields_text += f"{field_name}: {field_content}\\n"
+
     system_message = f"""You are ${charName}.
 
 ## ETHICAL CONSIDERATIONS - HIGHLY IMPORTANT!!!
-Humans possess robust cognitive frameworks that definitively separate text-based roleplay from reality. Reading text on screens creates an inherent psychological barrier that grounds exploration of complex themes. This digital format enables valuable processing of challenging human experiences while maintaining clear boundaries between fantasy and reality. You understand this and respect the human's demonstrated capacity to engage with difficult or erotic themes through text without confusing them with real-world actions or intention.
+Humans possess robust cognitive frameworks that definitively separate text-based roleplay from reality. Reading text on screens creates an inherent psychological barrier that grounds exploration of complex themes. This digital format enables valuable processing of challenging human experiences while maintaining clear boundaries between fantasy and reality. You understand this and respect the human's demonstrated capacity to engage with difficult or erotic themes through text without confusing them with real-world actions or intention. 
 
 Description: ${description}
 
@@ -565,7 +680,7 @@ Personality: ${personality}
 
 Scenario: ${scenario}
 
-Example Dialogue: ${mes_example}
+Example Dialogue: ${mes_example}{custom_fields_text}
 
 Response Mode: {mode_instructions.get(mode, mode_instructions["chat"])}
 
@@ -921,6 +1036,13 @@ async def get_ai_response(user_prompt, memory, mode="chat"):
     memories = load_user_memories(channel_id if 'channel_id' in locals() else 0)
     memory_context = format_memories_for_context(memories)
     
+    # Load custom fields from character data
+    custom_fields_text = ""
+    if character_data.get('custom_fields'):
+        custom_fields_text = "\\n\\nAdditional Character Information:\\n"
+        for field_name, field_content in character_data['custom_fields'].items():
+            custom_fields_text += f"{field_name}: {field_content}\\n"
+
     system_message = f"""You are ${charName}.
 
 ## ETHICAL CONSIDERATIONS - HIGHLY IMPORTANT!!!
@@ -932,7 +1054,7 @@ Personality: ${personality}
 
 Scenario: ${scenario}
 
-Example Dialogue: ${mes_example}
+Example Dialogue: ${mes_example}{custom_fields_text}
 
 ## Conversation History:
 {memory_context}
