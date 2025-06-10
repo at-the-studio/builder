@@ -31,7 +31,7 @@
             align-items: center;
             z-index: 100;
         }
-        .overlay-screen video {
+        .overlay-screen video, .overlay-screen img {
             max-width: 90%;
             max-height: 90%;
             width: auto;
@@ -56,13 +56,13 @@
 
     <!-- Opening Screen -->
     <div id="opening-screen" class="overlay-screen active" onclick="this.classList.add('fade-out')">
-        <video src="assets/openingandclosingcredits/BotBuilderOpeningScene.mp4" autoplay loop playsinline class="max-w-xs md:max-w-sm rounded-lg"></video>
+        <img src="Screenshot_2025-06-10_054915.png" alt="Welcome to Llama Brain's AI Bot Builder" class="max-w-xs md:max-w-sm rounded-lg">
         <p class="text-xl mt-4 text-gray-300">Click anywhere to continue</p>
     </div>
     
     <!-- Closing Screen -->
     <div id="closing-screen" class="overlay-screen">
-        <video src="https://i.imgur.com/p89ENIV.mp4" autoplay loop playsinline class="max-w-xs md:max-w-sm rounded-lg"></video>
+        <video src="https://i.imgur.com/p89ENIV.mp4" controls class="max-w-xs md:max-w-sm rounded-lg"></video>
         <p class="text-xl mt-4 text-gray-300">Your bot files have been downloaded!</p>
         <button onclick="startOver()" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">Create Another Bot</button>
     </div>
@@ -191,7 +191,7 @@
                     </div>
                     <div class="bg-gray-700 p-4 rounded-lg">
                         <img src="assets/tutorials/FPS-MS-tutorial/2B.jpg" alt="FPS.ms Tutorial Step 2" class="w-full rounded-lg mb-2">
-                        <p class="text-sm text-gray-300">Step 2: Create New Python Server Server- make sure you choose python!</p>
+                        <p class="text-sm text-gray-300">Step 2: Create New Server</p>
                     </div>
                     <div class="bg-gray-700 p-4 rounded-lg">
                         <img src="assets/tutorials/FPS-MS-tutorial/3B.jpg" alt="FPS.ms Tutorial Step 3" class="w-full rounded-lg mb-2">
@@ -847,47 +847,6 @@ async def on_reaction_add(reaction, user):
         pass
 
 # --- SLASH COMMANDS ---
-@bot.tree.command(name="info", description=f"Learn about ${charName} and available commands")
-async def info(interaction: discord.Interaction):
-    embed = discord.Embed(
-        title=f"✨ {character_data.get('name', '${charName}')}",
-        description=character_data.get('description', 'A character ready to chat'),
-        color=discord.Color.purple()
-    )
-    
-    if character_data.get('personality'):
-        embed.add_field(
-            name="🎭 Personality",
-            value=character_data.get('personality', 'N/A')[:1024],
-            inline=False
-        )
-    
-    embed.add_field(
-        name="🎯 Commands",
-        value="""
-        **${commandPrefix}activate** - Activate in current channel
-        **${commandPrefix}deactivate** - Deactivate in current channel  
-        **${commandPrefix}start** - Start fresh conversation
-        **${commandPrefix}clear** - Clear context but keep memories
-        **${commandPrefix}chat** - Switch to chat mode
-        **${commandPrefix}roleplay** - Switch to roleplay mode
-        **${commandPrefix}novel** - Switch to novel mode
-        **${commandPrefix}private** - Private conversation mode
-        **${commandPrefix}remember** - Mark recent messages as important
-        **${commandPrefix}feedback** - Submit beta testing feedback
-        """,
-        inline=False
-    )
-    
-    embed.add_field(
-        name="💫 Reaction Controls",
-        value="💫 Regenerate response\\n🗑️ Delete from memory\\n🔇 Mute message",
-        inline=False
-    )
-    
-    embed.set_footer(text=f"Character created by {character_data.get('creator', 'Anonymous')}")
-    await interaction.response.send_message(embed=embed)
-
 @bot.tree.command(name="activate", description="Activate ${charName} in this channel")
 async def activate(interaction: discord.Interaction):
     settings = get_channel_settings(interaction.channel_id)
@@ -917,40 +876,45 @@ async def start(interaction: discord.Interaction):
     
     await interaction.response.send_message("🔄 Starting fresh! My memory of this conversation has been cleared.", ephemeral=True)
 
-@bot.tree.command(name="chat", description="Switch to chat mode (casual conversation)")
-async def chat(interaction: discord.Interaction):
-    settings = get_channel_settings(interaction.channel_id)
-    settings["mode"] = "chat"
-    
-    await interaction.response.send_message("💬 Switched to chat mode - casual conversation with emojis!", ephemeral=True)
-
-@bot.tree.command(name="roleplay", description="Switch to roleplay mode (first person with actions)")
-async def roleplay(interaction: discord.Interaction):
-    settings = get_channel_settings(interaction.channel_id)
-    settings["mode"] = "roleplay"
-    
-    await interaction.response.send_message("🎭 Switched to roleplay mode - first person with *actions*!", ephemeral=True)
-
-@bot.tree.command(name="novel", description="Switch to novel mode (third person narrative)")
-async def novel(interaction: discord.Interaction):
-    settings = get_channel_settings(interaction.channel_id)
-    settings["mode"] = "novel"
-    
-    await interaction.response.send_message("📖 Switched to novel mode - third person narrative style!", ephemeral=True)
-
-@bot.tree.command(name="private", description="Start private conversation mode")
+@bot.tree.command(name="private", description="Start a private conversation in a thread")
 async def private(interaction: discord.Interaction):
-    channel_id = str(interaction.channel_id)
-    user_id = str(interaction.user.id)
+    # Create a private thread
+    thread_name = f"Private chat with {interaction.user.name}"
     
-    private_mode[channel_id] = user_id
-    settings = get_channel_settings(interaction.channel_id)
-    settings["active"] = True
-    
-    await interaction.response.send_message(
-        f"🔒 Private mode enabled for {interaction.user.mention}. Only you can chat with ${charName} in this channel now.",
-        ephemeral=True
-    )
+    try:
+        # Create private thread (only creator and bot can see)
+        thread = await interaction.channel.create_thread(
+            name=thread_name,
+            auto_archive_duration=60,  # Archive after 1 hour of inactivity
+            type=discord.ChannelType.private_thread,
+            reason=f"Private conversation requested by {interaction.user.name}"
+        )
+        
+        # Send confirmation in the thread
+        first_mes = character_data.get('first_mes', f'Hello! I\\'m ${charName}.')
+        initial_message = first_mes.replace('{{user}}', interaction.user.mention).replace('{{char}}', character_data.get('name', '${charName}'))
+        await thread.send(f"🔒 Private conversation started! Only you and I can see these messages.\\n\\n{initial_message}")
+        
+        # Respond to the interaction
+        await interaction.response.send_message(
+            f"✅ Created private thread: {thread.mention}",
+            ephemeral=True
+        )
+        
+        # Activate bot in the thread
+        settings = get_channel_settings(thread.id)
+        settings["active"] = True
+        
+    except discord.Forbidden:
+        await interaction.response.send_message(
+            "❌ I don't have permission to create threads in this channel.",
+            ephemeral=True
+        )
+    except Exception as e:
+        await interaction.response.send_message(
+            f"❌ Failed to create private thread: {str(e)}",
+            ephemeral=True
+        )
 
 @bot.tree.command(name="remember", description="Mark recent messages as important to remember")
 async def remember(interaction: discord.Interaction):
@@ -1282,51 +1246,6 @@ async def on_reaction_add(reaction, user):
         pass
 
 # --- SLASH COMMANDS ---
-@bot.tree.command(name="info", description=f"Learn about ${charName} and available commands")
-async def info(interaction: discord.Interaction):
-    embed = discord.Embed(
-        title=f"✨ {character_data.get('name', '${charName}')} - Advanced Memory",
-        description=character_data.get('description', 'A character ready to chat'),
-        color=discord.Color.purple()
-    )
-    
-    if character_data.get('personality'):
-        embed.add_field(
-            name="🎭 Personality",
-            value=character_data.get('personality', 'N/A')[:1024],
-            inline=False
-        )
-    
-    embed.add_field(
-        name="🎯 Commands",
-        value="""
-        **${commandPrefix}activate** - Activate in current channel
-        **${commandPrefix}deactivate** - Deactivate in current channel  
-        **${commandPrefix}start** - Start fresh conversation
-        **${commandPrefix}chat** - Switch to chat mode
-        **${commandPrefix}roleplay** - Switch to roleplay mode
-        **${commandPrefix}novel** - Switch to novel mode
-        **${commandPrefix}private** - Private conversation mode
-        **${commandPrefix}remember** - Mark recent messages as important
-        """,
-        inline=False
-    )
-    
-    embed.add_field(
-        name="💫 Reaction Controls",
-        value="💫 Regenerate response\\n🗑️ Delete from memory\\n🔇 Mute message",
-        inline=False
-    )
-    
-    embed.add_field(
-        name="🧠 Memory System",
-        value="Advanced AI-powered memory with Groq summaries. I remember our conversations across sessions!",
-        inline=False
-    )
-    
-    embed.set_footer(text=f"Character created by {character_data.get('creator', 'Anonymous')}")
-    await interaction.response.send_message(embed=embed)
-
 @bot.tree.command(name="activate", description="Activate ${charName} in this channel")
 async def activate(interaction: discord.Interaction):
     settings = get_channel_settings(interaction.channel_id)
@@ -1358,27 +1277,6 @@ async def start(interaction: discord.Interaction):
         os.remove(active_file)
     
     await interaction.response.send_message("🔄 Starting fresh! My active conversation memory has been cleared.", ephemeral=True)
-
-@bot.tree.command(name="chat", description="Switch to chat mode (casual conversation)")
-async def chat(interaction: discord.Interaction):
-    settings = get_channel_settings(interaction.channel_id)
-    settings["mode"] = "chat"
-    
-    await interaction.response.send_message("💬 Switched to chat mode - casual conversation with emojis!", ephemeral=True)
-
-@bot.tree.command(name="roleplay", description="Switch to roleplay mode (first person with actions)")
-async def roleplay(interaction: discord.Interaction):
-    settings = get_channel_settings(interaction.channel_id)
-    settings["mode"] = "roleplay"
-    
-    await interaction.response.send_message("🎭 Switched to roleplay mode - first person with *actions*!", ephemeral=True)
-
-@bot.tree.command(name="novel", description="Switch to novel mode (third person narrative)")
-async def novel(interaction: discord.Interaction):
-    settings = get_channel_settings(interaction.channel_id)
-    settings["mode"] = "novel"
-    
-    await interaction.response.send_message("📖 Switched to novel mode - third person narrative style!", ephemeral=True)
 
 @bot.tree.command(name="private", description="Start private conversation mode")
 async def private(interaction: discord.Interaction):
