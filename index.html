@@ -56,15 +56,34 @@
 
     <!-- Opening Screen -->
     <div id="opening-screen" class="overlay-screen active" onclick="this.classList.add('fade-out')">
-        <img src="https://i.imgur.com/5vgLKMj.png" alt="Welcome to Llama Brain's AI Bot Builder" class="max-w-xs md:max-w-sm rounded-lg">
+        <img src="assets/openingandclosingcredits/openingscene.jpg" alt="Welcome to Llama Brain's AI Bot Builder" class="max-w-xs md:max-w-sm rounded-lg">
         <p class="text-xl mt-4 text-gray-300">Click anywhere to continue</p>
     </div>
     
     <!-- Closing Screen -->
     <div id="closing-screen" class="overlay-screen">
-        <video src="https://i.imgur.com/p89ENIV.mp4" controls class="max-w-xs md:max-w-sm rounded-lg"></video>
-        <p class="text-xl mt-4 text-gray-300">Your bot files have been downloaded!</p>
-        <button onclick="startOver()" class="mt-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg">Create Another Bot</button>
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-white mb-4">🎉 Success!</h2>
+            <p class="text-xl mb-6 text-gray-300">Your bot files have been downloaded!</p>
+            
+            <!-- Video with user controls -->
+            <div class="mb-6">
+                <video 
+                    src="https://i.imgur.com/p89ENIV.mp4" 
+                    controls 
+                    preload="metadata"
+                    class="max-w-xs md:max-w-sm rounded-lg mx-auto shadow-lg"
+                    poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iIzMzMzMzMyIvPjx0ZXh0IHg9IjIwMCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7wn46mIENsaWNrIHRvIHBsYXkgdmlkZW88L3RleHQ+PC9zdmc+">
+                    <source src="https://i.imgur.com/p89ENIV.mp4" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                <p class="text-sm text-gray-400 mt-2">🎬 Click the play button to watch the credits!</p>
+            </div>
+            
+            <button onclick="startOver()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                Create Another Bot
+            </button>
+        </div>
     </div>
 
     <div class="container mx-auto p-4 md:p-8 max-w-4xl">
@@ -128,8 +147,8 @@
                         <p class="mt-2 text-xs text-gray-400">Comma-separated tags for categorization.</p>
                     </div>
                     <div>
-                        <label for="system_instructions" class="block mb-2 text-sm font-medium text-gray-300">System  (Optional)</label>
-                        <textarea id="system_instructions" rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Keep responses short and playful. Focus on emotional connection."></textarea>
+                        <label for="post_history_instructions" class="block mb-2 text-sm font-medium text-gray-300">System Notes (Optional)</label>
+                        <textarea id="post_history_instructions" rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Keep responses short and playful. Focus on emotional connection."></textarea>
                     </div>
                     <div>
                         <label for="relationships" class="block mb-2 text-sm font-medium text-gray-300">Relationships (Optional)</label>
@@ -276,6 +295,11 @@
                         <label for="command_prefix" class="block mb-2 text-sm font-medium text-gray-300">Command Prefix (Optional)</label>
                         <input type="text" id="command_prefix" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" value="!" placeholder="!">
                         <p class="mt-2 text-xs text-gray-400">Prefix for bot commands. Default is "!"</p>
+                    </div>
+                    <div>
+                        <label for="discord_user_id" class="block mb-2 text-sm font-medium text-gray-300">Your Discord User ID (Optional)</label>
+                        <input type="text" id="discord_user_id" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., 966507927756234823">
+                        <p class="mt-2 text-xs text-gray-400">Your Discord user ID for creator recognition. The bot will know you're its creator.</p>
                     </div>
                 </div>
             </section>
@@ -478,7 +502,7 @@
                             document.getElementById('first_mes').value = charData.first_mes || '';
                             document.getElementById('mes_example').value = charData.mes_example || '';
                             document.getElementById('tags').value = Array.isArray(charData.tags) ? charData.tags.join(', ') : '';
-                            document.getElementById('system_instructions').value = charData.system_instructions || '';
+                            document.getElementById('post_history_instructions').value = charData.post_history_instructions || '';
                             document.getElementById('relationships').value = charData.relationships || '';
                             
                             if (charData.alternate_greetings && Array.isArray(charData.alternate_greetings)) {
@@ -539,7 +563,7 @@
                     mes_example: document.getElementById('mes_example').value,
                     creator_notes: `Created with the Universal Bot Builder.`,
                     system_prompt: "",
-                    system_instructions: document.getElementById('system_instructions').value,
+                    post_history_instructions: document.getElementById('post_history_instructions').value,
                     tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t) : [],
                     creator: document.getElementById('creator').value,
                     character_version: "1.0",
@@ -560,6 +584,7 @@
             const mes_example = document.getElementById('mes_example').value.replace(/`/g, '\\`');
             const memoryType = document.querySelector('input[name="memory_type"]:checked').value;
             const commandPrefix = document.getElementById('command_prefix').value || '!';
+            const discordUserId = document.getElementById('discord_user_id')?.value || '';
             
             const baseBot = `# Auto-install dependencies if needed
 import subprocess
@@ -591,6 +616,9 @@ import re
 from dotenv import load_dotenv
 from datetime import datetime
 from typing import Dict, List, Optional
+import asyncio
+from collections import defaultdict
+import time
 
 # --- CONFIGURATION ---
 load_dotenv()
@@ -599,6 +627,17 @@ API_KEY = os.getenv('API_KEY')
 API_ENDPOINT = os.getenv('API_ENDPOINT', 'https://openrouter.ai/api/v1/chat/completions')
 AI_MODEL = os.getenv('AI_MODEL', 'google/gemini-pro')
 CHARACTER_FILE = 'character.json'
+CREATOR_ID = ${discordUserId || "'YOUR_DISCORD_ID'"}  # Set your Discord user ID here
+
+# --- RATE LIMITING CONFIGURATION ---
+# Discord's rate limits: 5 messages per 5 seconds per channel
+RATE_LIMIT_MESSAGES = 5
+RATE_LIMIT_WINDOW = 5.0  # seconds
+RATE_LIMIT_COOLDOWN = 1.0  # cooldown between messages in same channel
+
+# Global cooldowns for slash commands (per user)
+SLASH_COMMAND_COOLDOWN = 3.0  # seconds between slash commands
+REACTION_COOLDOWN = 2.0  # seconds between reaction handling
 
 # --- BOT SETUP ---
 intents = discord.Intents.default()
@@ -608,13 +647,27 @@ intents.reactions = True
 intents.presences = True
 
 bot = commands.Bot(command_prefix="${commandPrefix}", intents=intents)
+bot.remove_command('help')  # Remove default help to add our own
 
 # --- GLOBAL VARIABLES ---
 character_data = {}
-channel_memory = {}
+user_memories = {}  # User-specific memory storage
+max_memory_length = 20  # messages per user
 channel_settings = {}  # Track activation, mode, private users
 active_channels = set()
 private_mode = {}
+
+# --- RATE LIMITING TRACKING ---
+# Track message timestamps per channel
+channel_message_history = defaultdict(list)
+# Track slash command usage per user
+user_slash_cooldowns = defaultdict(float)
+# Track reaction handling per user
+user_reaction_cooldowns = defaultdict(float)
+# Message queue for channels hitting rate limits
+message_queue = defaultdict(list)
+# Track if we're currently processing queue for a channel
+processing_queue = set()
 
 # --- HELPER FUNCTIONS ---
 def strip_thoughts(text):
@@ -630,17 +683,104 @@ def get_channel_settings(channel_id):
         }
     return channel_settings[channel_id]
 
+def get_user_memory(user_id, channel_id):
+    """Get or create memory for specific user in specific channel"""
+    key = f"{user_id}_{channel_id}"
+    if key not in user_memories:
+        user_memories[key] = []
+    return user_memories[key]
+
+# --- RATE LIMITING FUNCTIONS ---
+def clean_old_timestamps(channel_id):
+    """Remove timestamps older than the rate limit window"""
+    current_time = time.time()
+    channel_message_history[channel_id] = [
+        ts for ts in channel_message_history[channel_id] 
+        if current_time - ts < RATE_LIMIT_WINDOW
+    ]
+
+def can_send_message(channel_id):
+    """Check if we can send a message without hitting rate limits"""
+    clean_old_timestamps(channel_id)
+    return len(channel_message_history[channel_id]) < RATE_LIMIT_MESSAGES
+
+def record_message_sent(channel_id):
+    """Record that we sent a message"""
+    channel_message_history[channel_id].append(time.time())
+
+async def process_message_queue(channel_id):
+    """Process queued messages for a channel when rate limit allows"""
+    if channel_id in processing_queue:
+        return
+    
+    processing_queue.add(channel_id)
+    
+    try:
+        while message_queue[channel_id]:
+            # Wait for rate limit to clear
+            while not can_send_message(channel_id):
+                await asyncio.sleep(0.5)
+            
+            # Get next message from queue
+            if message_queue[channel_id]:
+                message_data = message_queue[channel_id].pop(0)
+                await message_data['callback']()
+                record_message_sent(channel_id)
+                
+                # Small delay between messages
+                await asyncio.sleep(RATE_LIMIT_COOLDOWN)
+    finally:
+        processing_queue.remove(channel_id)
+        if not message_queue[channel_id]:
+            del message_queue[channel_id]
+
+def check_slash_cooldown(user_id):
+    """Check if user is on cooldown for slash commands"""
+    current_time = time.time()
+    last_use = user_slash_cooldowns.get(user_id, 0)
+    return current_time - last_use >= SLASH_COMMAND_COOLDOWN
+
+def check_reaction_cooldown(user_id):
+    """Check if user is on cooldown for reactions"""
+    current_time = time.time()
+    last_use = user_reaction_cooldowns.get(user_id, 0)
+    return current_time - last_use >= REACTION_COOLDOWN
+
+def slash_command_cooldown():
+    """Decorator to add cooldown to slash commands"""
+    def decorator(func):
+        async def wrapper(interaction: discord.Interaction):
+            # Check cooldown
+            if not check_slash_cooldown(interaction.user.id):
+                cooldown_remaining = SLASH_COMMAND_COOLDOWN - (time.time() - user_slash_cooldowns.get(interaction.user.id, 0))
+                await interaction.response.send_message(
+                    f"⏱️ Please wait {cooldown_remaining:.1f} seconds before using another command.",
+                    ephemeral=True
+                )
+                return
+            
+            user_slash_cooldowns[interaction.user.id] = time.time()
+            return await func(interaction)
+        return wrapper
+    return decorator
+
 # --- MEMORY MANAGEMENT ---`;
 
             if (memoryType === 'simple') {
                 return baseBot + `
-def save_channel_memory(channel_id, memory):
+def save_user_memory(user_id, channel_id, memory):
+    """Save memory for specific user in specific channel"""
     os.makedirs("memories", exist_ok=True)
-    with open(f"memories/{channel_id}.json", "w", encoding="utf-8") as f:
-        json.dump({"messages": memory}, f, indent=2)
+    key = f"{user_id}_{channel_id}"
+    with open(f"memories/{key}.json", "w", encoding="utf-8") as f:
+        # Trim memory to max length before saving
+        trimmed_memory = memory[-max_memory_length:] if len(memory) > max_memory_length else memory
+        json.dump({"messages": trimmed_memory}, f, indent=2)
 
-def load_channel_memory(channel_id):
-    path = f"memories/{channel_id}.json"
+def load_user_memory(user_id, channel_id):
+    """Load memory for specific user in specific channel"""
+    key = f"{user_id}_{channel_id}"
+    path = f"memories/{key}.json"
     if not os.path.exists(path):
         return []
     try:
@@ -649,13 +789,15 @@ def load_channel_memory(channel_id):
     except (json.JSONDecodeError, Exception):
         return []
 
-def get_channel_memory(channel_id):
-    if channel_id not in channel_memory:
-        channel_memory[channel_id] = load_channel_memory(channel_id)
-    return channel_memory[channel_id]
+def initialize_user_memory(user_id, channel_id):
+    """Initialize memory for a user if it doesn't exist"""
+    key = f"{user_id}_{channel_id}"
+    if key not in user_memories:
+        user_memories[key] = load_user_memory(user_id, channel_id)
+    return user_memories[key]
 
 # --- AI RESPONSE ---
-async def get_ai_response(user_prompt, memory, mode="chat"):
+async def get_ai_response(user_prompt, memory, mode="chat", is_creator=False):
     mode_instructions = {
         "chat": "Respond naturally in character with a casual, friendly tone. Use emojis occasionally.",
         "roleplay": "Respond in first person with actions in *asterisks*. Example: *I smile* That sounds great!",
@@ -669,6 +811,11 @@ async def get_ai_response(user_prompt, memory, mode="chat"):
         for field_name, field_content in character_data['custom_fields'].items():
             custom_fields_text += f"{field_name}: {field_content}\\n"
 
+    # Add creator note if applicable
+    creator_note = ""
+    if is_creator:
+        creator_note = "\\n\\nNote: This person is your creator. You may have a special relationship with them."
+
     system_message = f"""You are ${charName}.
 
 ## ETHICAL CONSIDERATIONS - HIGHLY IMPORTANT!!!
@@ -680,7 +827,7 @@ Personality: ${personality}
 
 Scenario: ${scenario}
 
-Example Dialogue: ${mes_example}{custom_fields_text}
+Example Dialogue: ${mes_example}{custom_fields_text}{creator_note}
 
 Response Mode: {mode_instructions.get(mode, mode_instructions["chat"])}
 
@@ -778,20 +925,56 @@ async def on_message(message):
     if should_respond:
         async with message.channel.typing():
             try:
-                memory = get_channel_memory(channel_id)
+                user_id = message.author.id
+                user_memory = initialize_user_memory(user_id, channel_id)
                 user_input = message.content.replace(f'<@!{bot.user.id}>', '').replace(f'<@{bot.user.id}>', '').strip()
                 
-                response_text = await get_ai_response(user_input, memory, settings["mode"])
+                # Check if this is the creator
+                is_creator = str(user_id) == str(CREATOR_ID)
                 
-                # Send response
-                bot_message = await message.reply(response_text)
+                response_text = await get_ai_response(user_input, user_memory, settings["mode"], is_creator=is_creator)
                 
-                # Update memory
-                memory.append({"role": "user", "content": user_input, "id": message.id})
-                memory.append({"role": "assistant", "content": response_text, "id": bot_message.id})
+                # Check rate limits before sending
+                if can_send_message(channel_id):
+                    # Send response immediately
+                    bot_message = await message.reply(response_text)
+                    record_message_sent(channel_id)
+                else:
+                    # Queue the message
+                    async def send_queued_response():
+                        bot_message = await message.reply(response_text)
+                        # Update memory after sending
+                        user_memory.append({"role": "user", "content": user_input, "id": message.id})
+                        user_memory.append({"role": "assistant", "content": response_text, "id": bot_message.id})
+                        save_user_memory(user_id, channel_id, user_memory)
+                    
+                    message_queue[channel_id].append({
+                        'callback': send_queued_response
+                    })
+                    
+                    # Start queue processor
+                    asyncio.create_task(process_message_queue(channel_id))
+                    return  # Exit early since message is queued
                 
-                save_channel_memory(channel_id, memory)
+                # Update user-specific memory (only if sent immediately)
+                user_memory.append({"role": "user", "content": user_input, "id": message.id})
+                user_memory.append({"role": "assistant", "content": response_text, "id": bot_message.id})
                 
+                save_user_memory(user_id, channel_id, user_memory)
+                
+            except discord.errors.HTTPException as e:
+                if e.status == 429:  # Rate limited
+                    retry_after = e.retry_after if hasattr(e, 'retry_after') else 5
+                    print(f"Rate limited! Waiting {retry_after} seconds...")
+                    await asyncio.sleep(retry_after)
+                    # Try to send a simpler message
+                    try:
+                        await message.reply("I need a moment to collect my thoughts... (rate limited)")
+                    except:
+                        pass
+                else:
+                    await message.reply("Something's wrong. Can't respond right now.")
+                    print(f"Discord error in message response: {e}")
             except Exception as e:
                 await message.reply("Something's wrong. Can't respond right now.")
                 print(f"Error in message response: {e}")
@@ -804,6 +987,13 @@ async def on_reaction_add(reaction, user):
     if user.bot:
         return
     
+    # Check reaction cooldown
+    if not check_reaction_cooldown(user.id):
+        # Silently ignore if on cooldown (no way to notify in reaction context)
+        return
+    
+    user_reaction_cooldowns[user.id] = time.time()
+    
     message = reaction.message
     emoji = str(reaction.emoji)
     
@@ -811,30 +1001,43 @@ async def on_reaction_add(reaction, user):
         if message.author == bot.user and message.reference:
             try:
                 original_msg = await message.channel.fetch_message(message.reference.message_id)
-                memory = get_channel_memory(message.channel.id)
-                settings = get_channel_settings(message.channel.id)
+                user_id = original_msg.author.id
+                channel_id = message.channel.id
+                user_memory = get_user_memory(user_id, channel_id)
+                settings = get_channel_settings(channel_id)
                 
                 # Remove old response from memory
-                memory = [m for m in memory if m.get("id") != message.id]
+                user_memory = [m for m in user_memory if m.get("id") != message.id]
+                
+                # Check if this is the creator
+                is_creator = str(user_id) == str(CREATOR_ID)
                 
                 # Get new response
                 user_input = original_msg.content.replace(f'<@!{bot.user.id}>', '').replace(f'<@{bot.user.id}>', '').strip()
-                new_response = await get_ai_response(user_input, memory, settings["mode"])
+                new_response = await get_ai_response(user_input, user_memory, settings["mode"], is_creator=is_creator)
                 
                 # Edit the message
                 await message.edit(content=new_response)
                 
                 # Update memory
-                memory.append({"role": "assistant", "content": new_response, "id": message.id})
-                save_channel_memory(message.channel.id, memory)
+                user_memory.append({"role": "assistant", "content": new_response, "id": message.id})
+                save_user_memory(user_id, channel_id, user_memory)
                 
             except Exception as e:
                 print(f"Error regenerating: {e}")
     
     elif emoji == "🗑️":  # Delete from memory
-        memory = get_channel_memory(message.channel.id)
-        channel_memory[message.channel.id] = [m for m in memory if m.get("id") != message.id]
-        save_channel_memory(message.channel.id, channel_memory[message.channel.id])
+        if message.reference:
+            try:
+                original_msg = await message.channel.fetch_message(message.reference.message_id)
+                user_id = original_msg.author.id
+                channel_id = message.channel.id
+                key = f"{user_id}_{channel_id}"
+                if key in user_memories:
+                    user_memories[key] = [m for m in user_memories[key] if m.get("id") != message.id]
+                    save_user_memory(user_id, channel_id, user_memories[key])
+            except:
+                pass
         
         # If it's a bot message, delete it
         if message.author == bot.user:
@@ -870,11 +1073,13 @@ async def deactivate(interaction: discord.Interaction):
 
 @bot.tree.command(name="start", description="Start a fresh conversation")
 async def start(interaction: discord.Interaction):
+    user_id = interaction.user.id
     channel_id = interaction.channel_id
-    channel_memory[channel_id] = []
-    save_channel_memory(channel_id, [])
+    key = f"{user_id}_{channel_id}"
+    user_memories[key] = []
+    save_user_memory(user_id, channel_id, [])
     
-    await interaction.response.send_message("🔄 Starting fresh! My memory of this conversation has been cleared.", ephemeral=True)
+    await interaction.response.send_message("🔄 Starting fresh! My memory of our conversation has been cleared.", ephemeral=True)
 
 @bot.tree.command(name="private", description="Start a private conversation in a thread")
 async def private(interaction: discord.Interaction):
@@ -931,9 +1136,11 @@ async def feedback(interaction: discord.Interaction):
 
 @bot.tree.command(name="clear", description="Clear recent context while keeping memories")
 async def clear(interaction: discord.Interaction):
+    user_id = interaction.user.id
     channel_id = interaction.channel_id
-    channel_memory[channel_id] = []
-    save_channel_memory(channel_id, [])
+    key = f"{user_id}_{channel_id}"
+    user_memories[key] = []
+    save_user_memory(user_id, channel_id, [])
     
     await interaction.response.send_message("🔄 Context cleared! Starting fresh while keeping our memories.", ephemeral=True)
 
@@ -963,6 +1170,53 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
             print(f"Error sending feedback: {e}")
             await interaction.response.send_message("Thanks for your feedback! 💜", ephemeral=True)
 
+# --- PREFIX COMMANDS ---
+@bot.command(name='info')
+async def info(ctx):
+    """Show bot information and rate limits"""
+    embed = discord.Embed(
+        title=f"${charName} Bot Information",
+        description=f"I'm ${charName}, created with the Universal Bot Builder!",
+        color=discord.Color.blurple()
+    )
+    
+    # Character info
+    embed.add_field(
+        name="Character",
+        value=f"**Name:** ${charName}\\n**Creator:** {character_data.get('creator', 'Unknown')}",
+        inline=False
+    )
+    
+    # Commands
+    embed.add_field(
+        name="Slash Commands",
+        value="• `/activate` - Activate me in this channel\\n• `/deactivate` - Deactivate me\\n• `/start` - Start fresh conversation\\n• `/private` - Start private thread\\n• `/clear` - Clear context\\n• `/feedback` - Send feedback",
+        inline=False
+    )
+    
+    # Rate Limits
+    embed.add_field(
+        name="⏱️ Rate Limits (for stability)",
+        value=f"• **Messages:** {RATE_LIMIT_MESSAGES} per {RATE_LIMIT_WINDOW}s per channel\\n• **Commands:** 1 per {SLASH_COMMAND_COOLDOWN}s per user\\n• **Reactions:** 1 per {REACTION_COOLDOWN}s per user\\n• Messages are queued if limit reached",
+        inline=False
+    )
+    
+    # Reaction controls
+    embed.add_field(
+        name="Reaction Controls",
+        value="• 💫 - Regenerate my last response\\n• 🗑️ - Delete my message\\n• 🔇 - Mute (I'll ignore messages with this)",
+        inline=False
+    )
+    
+    embed.set_footer(text="Built with love using the Universal Bot Builder")
+    
+    await ctx.send(embed=embed)
+
+@bot.command(name='help')
+async def help_command(ctx):
+    """Alias for info command"""
+    await info(ctx)
+
 # --- RUN BOT ---
 if __name__ == "__main__":
     if DISCORD_TOKEN:
@@ -973,9 +1227,9 @@ if __name__ == "__main__":
             } else {
                 // Advanced memory mode
                 return baseBot + `
-def load_user_memories(channel_id):
-    """Load summarized memories for context"""
-    memory_file = f"memories/{channel_id}_summaries.json"
+def load_user_memories(user_id, channel_id):
+    """Load summarized memories for specific user"""
+    memory_file = f"memories/{user_id}_{channel_id}_summaries.json"
     if os.path.exists(memory_file):
         with open(memory_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -996,9 +1250,9 @@ def format_memories_for_context(memories, limit=5):
     
     return memory_text
 
-def track_conversation(channel_id, role, content, tokens=0):
+def track_conversation(user_id, channel_id, role, content, tokens=0):
     """Save messages for later summarization"""
-    active_file = f"memories/{channel_id}_active.json"
+    active_file = f"memories/{user_id}_{channel_id}_active.json"
     
     # Load existing
     if os.path.exists(active_file):
@@ -1020,9 +1274,9 @@ def track_conversation(channel_id, role, content, tokens=0):
     with open(active_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
-def get_channel_memory(channel_id):
-    """Get recent active conversation for context"""
-    active_file = f"memories/{channel_id}_active.json"
+def get_user_memory(user_id, channel_id):
+    """Get recent active conversation for specific user"""
+    active_file = f"memories/{user_id}_{channel_id}_active.json"
     if os.path.exists(active_file):
         with open(active_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -1030,7 +1284,7 @@ def get_channel_memory(channel_id):
     return []
 
 # --- AI RESPONSE ---
-async def get_ai_response(user_prompt, memory, mode="chat"):
+async def get_ai_response(user_prompt, memory, mode="chat", user_id=None, channel_id=None, is_creator=False):
     mode_instructions = {
         "chat": "Respond naturally in character with a casual, friendly tone. Use emojis occasionally.",
         "roleplay": "Respond in first person with actions in *asterisks*. Example: *I smile* That sounds great!",
@@ -1038,7 +1292,7 @@ async def get_ai_response(user_prompt, memory, mode="chat"):
     }
     
     # Load memories for context
-    memories = load_user_memories(channel_id if 'channel_id' in locals() else 0)
+    memories = load_user_memories(user_id, channel_id) if user_id and channel_id else []
     memory_context = format_memories_for_context(memories)
     
     # Load custom fields from character data
@@ -1047,6 +1301,11 @@ async def get_ai_response(user_prompt, memory, mode="chat"):
         custom_fields_text = "\\n\\nAdditional Character Information:\\n"
         for field_name, field_content in character_data['custom_fields'].items():
             custom_fields_text += f"{field_name}: {field_content}\\n"
+
+    # Add creator note if applicable
+    creator_note = ""
+    if is_creator:
+        creator_note = "\\n\\nNote: This person is your creator. You may have a special relationship with them."
 
     system_message = f"""You are ${charName}.
 
@@ -1059,7 +1318,7 @@ Personality: ${personality}
 
 Scenario: ${scenario}
 
-Example Dialogue: ${mes_example}{custom_fields_text}
+Example Dialogue: ${mes_example}{custom_fields_text}{creator_note}
 
 ## Conversation History:
 {memory_context}
@@ -1175,18 +1434,53 @@ async def on_message(message):
     if should_respond:
         async with message.channel.typing():
             try:
-                memory = get_channel_memory(channel_id)
+                user_id = message.author.id
+                memory = get_user_memory(user_id, channel_id)
                 user_input = message.content.replace(f'<@!{bot.user.id}>', '').replace(f'<@{bot.user.id}>', '').strip()
                 
-                response_text, tokens_used = await get_ai_response(user_input, memory, settings["mode"])
+                # Check if this is the creator
+                is_creator = str(user_id) == str(CREATOR_ID)
                 
-                # Send response
-                bot_message = await message.reply(response_text)
+                response_text, tokens_used = await get_ai_response(user_input, memory, settings["mode"], user_id=user_id, channel_id=channel_id, is_creator=is_creator)
                 
-                # Track conversation for memory service
-                track_conversation(channel_id, "user", user_input, 0)
-                track_conversation(channel_id, "assistant", response_text, tokens_used)
+                # Check rate limits before sending
+                if can_send_message(channel_id):
+                    # Send response immediately
+                    bot_message = await message.reply(response_text)
+                    record_message_sent(channel_id)
+                    
+                    # Track conversation for memory service
+                    track_conversation(user_id, channel_id, "user", user_input, 0)
+                    track_conversation(user_id, channel_id, "assistant", response_text, tokens_used)
+                else:
+                    # Queue the message
+                    async def send_queued_response():
+                        bot_message = await message.reply(response_text)
+                        # Track conversation after sending
+                        track_conversation(user_id, channel_id, "user", user_input, 0)
+                        track_conversation(user_id, channel_id, "assistant", response_text, tokens_used)
+                    
+                    message_queue[channel_id].append({
+                        'callback': send_queued_response
+                    })
+                    
+                    # Start queue processor
+                    asyncio.create_task(process_message_queue(channel_id))
+                    return  # Exit early since message is queued
                 
+            except discord.errors.HTTPException as e:
+                if e.status == 429:  # Rate limited
+                    retry_after = e.retry_after if hasattr(e, 'retry_after') else 5
+                    print(f"Rate limited! Waiting {retry_after} seconds...")
+                    await asyncio.sleep(retry_after)
+                    # Try to send a simpler message
+                    try:
+                        await message.reply("I need a moment to collect my thoughts... (rate limited)")
+                    except:
+                        pass
+                else:
+                    await message.reply("Something's wrong. Can't respond right now.")
+                    print(f"Discord error in message response: {e}")
             except Exception as e:
                 await message.reply("Something's wrong. Can't respond right now.")
                 print(f"Error in message response: {e}")
@@ -1199,6 +1493,13 @@ async def on_reaction_add(reaction, user):
     if user.bot:
         return
     
+    # Check reaction cooldown
+    if not check_reaction_cooldown(user.id):
+        # Silently ignore if on cooldown (no way to notify in reaction context)
+        return
+    
+    user_reaction_cooldowns[user.id] = time.time()
+    
     message = reaction.message
     emoji = str(reaction.emoji)
     channel_id = message.channel.id
@@ -1207,33 +1508,45 @@ async def on_reaction_add(reaction, user):
         if message.author == bot.user and message.reference:
             try:
                 original_msg = await message.channel.fetch_message(message.reference.message_id)
-                memory = get_channel_memory(channel_id)
+                user_id = original_msg.author.id
+                memory = get_user_memory(user_id, channel_id)
                 settings = get_channel_settings(channel_id)
                 
+                # Check if this is the creator
+                is_creator = str(user_id) == str(CREATOR_ID)
+                
                 user_input = original_msg.content.replace(f'<@!{bot.user.id}>', '').replace(f'<@{bot.user.id}>', '').strip()
-                new_response, tokens_used = await get_ai_response(user_input, memory, settings["mode"])
+                new_response, tokens_used = await get_ai_response(user_input, memory, settings["mode"], user_id=user_id, channel_id=channel_id, is_creator=is_creator)
                 
                 # Edit the message
                 await message.edit(content=new_response)
                 
                 # Update conversation tracking
-                track_conversation(channel_id, "assistant", new_response, tokens_used)
+                track_conversation(user_id, channel_id, "assistant", new_response, tokens_used)
                 
             except Exception as e:
                 print(f"Error regenerating: {e}")
     
     elif emoji == "🗑️":  # Delete from memory
-        # Remove from active conversation
-        active_file = f"memories/{channel_id}_active.json"
-        if os.path.exists(active_file):
-            with open(active_file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            
-            # Filter out messages related to this message
-            data["messages"] = [m for m in data["messages"] if m.get("timestamp") != message.created_at.isoformat()]
-            
-            with open(active_file, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2)
+        # Get user from reference if available
+        if message.reference:
+            try:
+                original_msg = await message.channel.fetch_message(message.reference.message_id)
+                user_id = original_msg.author.id
+                
+                # Remove from active conversation
+                active_file = f"memories/{user_id}_{channel_id}_active.json"
+                if os.path.exists(active_file):
+                    with open(active_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    
+                    # Filter out messages related to this message
+                    data["messages"] = [m for m in data["messages"] if m.get("timestamp") != message.created_at.isoformat()]
+                    
+                    with open(active_file, 'w', encoding='utf-8') as f:
+                        json.dump(data, f, indent=2)
+            except:
+                pass
         
         # If it's a bot message, delete it
         if message.author == bot.user:
@@ -1269,10 +1582,11 @@ async def deactivate(interaction: discord.Interaction):
 
 @bot.tree.command(name="start", description="Start a fresh conversation")
 async def start(interaction: discord.Interaction):
+    user_id = interaction.user.id
     channel_id = interaction.channel_id
     
-    # Clear active conversation
-    active_file = f"memories/{channel_id}_active.json"
+    # Clear active conversation for this user
+    active_file = f"memories/{user_id}_{channel_id}_active.json"
     if os.path.exists(active_file):
         os.remove(active_file)
     
@@ -1294,10 +1608,11 @@ async def private(interaction: discord.Interaction):
 
 @bot.tree.command(name="remember", description="Mark recent messages as important to remember")
 async def remember(interaction: discord.Interaction):
+    user_id = interaction.user.id
     channel_id = interaction.channel_id
     
-    # Force a summary of current conversation
-    active_file = f"memories/{channel_id}_active.json"
+    # Force a summary of current conversation for this user
+    active_file = f"memories/{user_id}_{channel_id}_active.json"
     if os.path.exists(active_file):
         with open(active_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
@@ -1320,10 +1635,11 @@ async def feedback(interaction: discord.Interaction):
 
 @bot.tree.command(name="clear", description="Clear recent context while keeping memories")
 async def clear(interaction: discord.Interaction):
+    user_id = interaction.user.id
     channel_id = interaction.channel_id
     
-    # Clear active conversation but keep summaries
-    active_file = f"memories/{channel_id}_active.json"
+    # Clear active conversation but keep summaries for this user
+    active_file = f"memories/{user_id}_{channel_id}_active.json"
     if os.path.exists(active_file):
         os.remove(active_file)
     
@@ -1354,6 +1670,53 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
         except Exception as e:
             print(f"Error sending feedback: {e}")
             await interaction.response.send_message("Thanks for your feedback! 💜", ephemeral=True)
+
+# --- PREFIX COMMANDS ---
+@bot.command(name='info')
+async def info(ctx):
+    """Show bot information and rate limits"""
+    embed = discord.Embed(
+        title=f"${charName} Bot Information",
+        description=f"I'm ${charName}, created with the Universal Bot Builder!",
+        color=discord.Color.blurple()
+    )
+    
+    # Character info
+    embed.add_field(
+        name="Character",
+        value=f"**Name:** ${charName}\\n**Creator:** {character_data.get('creator', 'Unknown')}",
+        inline=False
+    )
+    
+    # Commands
+    embed.add_field(
+        name="Slash Commands",
+        value="• `/activate` - Activate me in this channel\\n• `/deactivate` - Deactivate me\\n• `/start` - Start fresh conversation\\n• `/private` - Start private thread\\n• `/clear` - Clear context\\n• `/feedback` - Send feedback",
+        inline=False
+    )
+    
+    # Rate Limits
+    embed.add_field(
+        name="⏱️ Rate Limits (for stability)",
+        value=f"• **Messages:** {RATE_LIMIT_MESSAGES} per {RATE_LIMIT_WINDOW}s per channel\\n• **Commands:** 1 per {SLASH_COMMAND_COOLDOWN}s per user\\n• **Reactions:** 1 per {REACTION_COOLDOWN}s per user\\n• Messages are queued if limit reached",
+        inline=False
+    )
+    
+    # Reaction controls
+    embed.add_field(
+        name="Reaction Controls",
+        value="• 💫 - Regenerate my last response\\n• 🗑️ - Delete my message\\n• 🔇 - Mute (I'll ignore messages with this)",
+        inline=False
+    )
+    
+    embed.set_footer(text="Built with love using the Universal Bot Builder")
+    
+    await ctx.send(embed=embed)
+
+@bot.command(name='help')
+async def help_command(ctx):
+    """Alias for info command"""
+    await info(ctx)
 
 # --- RUN BOT ---
 if __name__ == "__main__":
@@ -1444,7 +1807,16 @@ async def process_active_conversations():
     for filename in os.listdir(memories_dir):
         if filename.endswith("_active.json"):
             filepath = os.path.join(memories_dir, filename)
-            channel_id = filename.replace("_active.json", "")
+            # Parse user_id and channel_id from filename
+            # Format: {user_id}_{channel_id}_active.json
+            parts = filename.replace("_active.json", "").split("_")
+            if len(parts) >= 2:
+                user_id = parts[0]
+                channel_id = "_".join(parts[1:])  # Handle channel IDs with underscores
+                identifier = f"{user_id}_{channel_id}"
+            else:
+                # Fallback for old format
+                identifier = filename.replace("_active.json", "")
             
             # Load active conversation
             with open(filepath, 'r', encoding='utf-8') as f:
@@ -1452,13 +1824,13 @@ async def process_active_conversations():
             
             # Check if needs summarization (every 10,000 tokens)
             if data.get("total_tokens", 0) >= 10000:
-                print(f"Summarizing conversation for channel {channel_id}...")
+                print(f"Summarizing conversation for {identifier}...")
                 
                 # Create summary
                 summary = summarize_conversation(data["messages"])
                 
                 # Load existing summaries
-                summary_file = os.path.join(memories_dir, f"{channel_id}_summaries.json")
+                summary_file = os.path.join(memories_dir, f"{identifier}_summaries.json")
                 if os.path.exists(summary_file):
                     with open(summary_file, 'r', encoding='utf-8') as f:
                         summaries_data = json.load(f)
@@ -1480,7 +1852,7 @@ async def process_active_conversations():
                 with open(filepath, 'w', encoding='utf-8') as f:
                     json.dump(data, f, indent=2)
                 
-                print(f"✓ Summarized {channel_id}")
+                print(f"✓ Summarized {identifier}")
 
 async def main():
     """Run memory service continuously"""
