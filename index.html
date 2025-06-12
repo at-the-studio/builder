@@ -147,8 +147,8 @@
                         <p class="mt-2 text-xs text-gray-400">Comma-separated tags for categorization.</p>
                     </div>
                     <div>
-                        <label for="post_history_instructions" class="block mb-2 text-sm font-medium text-gray-300">System Notes (Optional)</label>
-                        <textarea id="post_history_instructions" rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Keep responses short and playful. Focus on emotional connection."></textarea>
+                        <label for="system_instructions" class="block mb-2 text-sm font-medium text-gray-300">System Notes (Optional)</label>
+                        <textarea id="system_instructions" rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Keep responses short and playful. Focus on emotional connection."></textarea>
                     </div>
                     <div>
                         <label for="relationships" class="block mb-2 text-sm font-medium text-gray-300">Relationships (Optional)</label>
@@ -502,7 +502,7 @@
                             document.getElementById('first_mes').value = charData.first_mes || '';
                             document.getElementById('mes_example').value = charData.mes_example || '';
                             document.getElementById('tags').value = Array.isArray(charData.tags) ? charData.tags.join(', ') : '';
-                            document.getElementById('post_history_instructions').value = charData.post_history_instructions || '';
+                            document.getElementById('system_instructions').value = charData.system_instructions || '';
                             document.getElementById('relationships').value = charData.relationships || '';
                             
                             if (charData.alternate_greetings && Array.isArray(charData.alternate_greetings)) {
@@ -563,7 +563,7 @@
                     mes_example: document.getElementById('mes_example').value,
                     creator_notes: `Created with the Universal Bot Builder.`,
                     system_prompt: "",
-                    post_history_instructions: document.getElementById('post_history_instructions').value,
+                    system_instructions: document.getElementById('system_instructions').value,
                     tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t) : [],
                     creator: document.getElementById('creator').value,
                     character_version: "1.0",
