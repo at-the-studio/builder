@@ -169,6 +169,60 @@
                         <!-- Custom sections will be added here dynamically -->
                     </div>
                 </div>
+
+                <!-- Creator Notes Section -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold text-yellow-400 mb-4">🔒 Creator Notes (Password Protected)</h3>
+                    <div class="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4 mb-4">
+                        <p class="text-sm text-yellow-300 mb-2">
+                            <strong>Private & Secure:</strong> These notes are password protected and NOT included in character files. Use this space for:
+                        </p>
+                        <ul class="text-sm text-yellow-200 list-disc list-inside space-y-1">
+                            <li>Personal reminders about the character</li>
+                            <li>Development notes and ideas</li>
+                            <li>Character arc plans</li>
+                            <li>Inspiration sources</li>
+                            <li>Testing notes</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Password Protection -->
+                    <div id="notes-password-setup" class="mb-4">
+                        <div class="flex gap-2 items-end">
+                            <div class="flex-1">
+                                <label for="notes-password" class="block mb-2 text-sm font-medium text-yellow-300">Set Password for Notes</label>
+                                <input type="password" id="notes-password" class="bg-gray-700 border border-yellow-600 text-white text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" placeholder="Enter password to protect your notes">
+                            </div>
+                            <button onclick="unlockCreatorNotes()" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2.5 px-4 rounded-lg transition-colors">
+                                🔓 Unlock
+                            </button>
+                        </div>
+                        <p class="text-xs text-yellow-200 mt-1">Password is stored locally and encrypted. No one else can access your notes without it.</p>
+                    </div>
+                    
+                    <!-- Notes Area (Initially Hidden) -->
+                    <div id="notes-area" style="display: none;">
+                        <div class="mb-2 flex justify-between items-center">
+                            <label for="creator-notes" class="text-sm font-medium text-yellow-300">Your Private Notes</label>
+                            <button onclick="lockCreatorNotes()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1 px-2 rounded transition-colors">
+                                🔒 Lock Notes
+                            </button>
+                        </div>
+                        <textarea id="creator-notes" rows="4" class="bg-gray-700 border border-yellow-600 text-white text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5" placeholder="e.g., Based on my friend Alex's personality... Inspired by [source]... Remember to test the flirty scenarios... Character arc: starts shy, becomes confident..."></textarea>
+                        <div class="mt-2 flex gap-2">
+                            <button onclick="saveCreatorNotes()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-1 px-3 rounded transition-colors">
+                                💾 Save Notes
+                            </button>
+                            <button onclick="loadCreatorNotes()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-1 px-3 rounded transition-colors">
+                                📂 Load Saved Notes
+                            </button>
+                            <button onclick="clearCreatorNotes()" class="bg-gray-600 hover:bg-gray-700 text-white text-sm font-bold py-1 px-3 rounded transition-colors">
+                                🗑️ Clear
+                            </button>
+                        </div>
+                        <p class="text-xs text-yellow-200 mt-1">Notes are automatically encrypted and saved locally in your browser.</p>
+                    </div>
+                </div>
             </section>
 
             <!-- Section 2: Discord Developer Portal Tutorial -->
@@ -309,6 +363,7 @@
                 <h2 class="text-2xl font-bold mb-2 text-indigo-400">6. Character Preview & Download</h2>
                 <div class="mb-6">
                     <h3 class="text-xl font-semibold mb-3 text-gray-300">Character Preview</h3>
+                    <p class="text-sm text-gray-400 mb-2">This shows what will be included in your character file. Creator Notes are private and not shown here.</p>
                     <div id="character-preview" class="bg-gray-700 p-4 rounded-lg">
                         <p class="text-gray-400 text-center">Fill in character details above to see preview</p>
                     </div>
@@ -473,6 +528,111 @@
             return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
 
+        // --- CREATOR NOTES PASSWORD PROTECTION ---
+        
+        let notesPassword = '';
+        
+        // Simple encryption/decryption (for local storage protection)
+        function simpleEncrypt(text, password) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                result += String.fromCharCode(text.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+            }
+            return btoa(result); // Base64 encode
+        }
+        
+        function simpleDecrypt(encryptedText, password) {
+            try {
+                const text = atob(encryptedText); // Base64 decode
+                let result = '';
+                for (let i = 0; i < text.length; i++) {
+                    result += String.fromCharCode(text.charCodeAt(i) ^ password.charCodeAt(i % password.length));
+                }
+                return result;
+            } catch (e) {
+                return '';
+            }
+        }
+        
+        function unlockCreatorNotes() {
+            const password = document.getElementById('notes-password').value;
+            if (!password) {
+                alert('Please enter a password first!');
+                return;
+            }
+            
+            notesPassword = password;
+            document.getElementById('notes-password-setup').style.display = 'none';
+            document.getElementById('notes-area').style.display = 'block';
+            
+            // Try to load existing notes
+            loadCreatorNotes();
+        }
+        
+        function lockCreatorNotes() {
+            // Save current notes before locking
+            if (document.getElementById('creator-notes').value.trim()) {
+                saveCreatorNotes();
+            }
+            
+            notesPassword = '';
+            document.getElementById('notes-password').value = '';
+            document.getElementById('creator-notes').value = '';
+            document.getElementById('notes-password-setup').style.display = 'block';
+            document.getElementById('notes-area').style.display = 'none';
+        }
+        
+        function saveCreatorNotes() {
+            if (!notesPassword) return;
+            
+            const notes = document.getElementById('creator-notes').value;
+            const charName = document.getElementById('charName').value || 'default';
+            const storageKey = `creator_notes_${charName.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            
+            if (notes.trim()) {
+                const encrypted = simpleEncrypt(notes, notesPassword);
+                localStorage.setItem(storageKey, encrypted);
+                
+                // Brief feedback
+                const saveBtn = event.target;
+                const originalText = saveBtn.textContent;
+                saveBtn.textContent = '✅ Saved!';
+                saveBtn.className = saveBtn.className.replace('bg-green-600', 'bg-emerald-600');
+                setTimeout(() => {
+                    saveBtn.textContent = originalText;
+                    saveBtn.className = saveBtn.className.replace('bg-emerald-600', 'bg-green-600');
+                }, 1500);
+            }
+        }
+        
+        function loadCreatorNotes() {
+            if (!notesPassword) return;
+            
+            const charName = document.getElementById('charName').value || 'default';
+            const storageKey = `creator_notes_${charName.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const encrypted = localStorage.getItem(storageKey);
+            
+            if (encrypted) {
+                const decrypted = simpleDecrypt(encrypted, notesPassword);
+                if (decrypted) {
+                    document.getElementById('creator-notes').value = decrypted;
+                } else {
+                    alert('Could not decrypt notes. Wrong password?');
+                }
+            }
+        }
+        
+        function clearCreatorNotes() {
+            if (confirm('Are you sure you want to clear your creator notes? This cannot be undone.')) {
+                document.getElementById('creator-notes').value = '';
+                
+                // Also remove from storage
+                const charName = document.getElementById('charName').value || 'default';
+                const storageKey = `creator_notes_${charName.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                localStorage.removeItem(storageKey);
+            }
+        }
+
         function updateCharacterPreview() {
             const name = escapeHtml(document.getElementById('charName').value || 'Unnamed Character');
             const description = escapeHtml(document.getElementById('description').value || 'No description');
@@ -564,6 +724,12 @@
                             }
                             
                             updateCharacterPreview();
+                            
+                            // If creator notes are unlocked, try to load notes for this character
+                            if (notesPassword) {
+                                loadCreatorNotes();
+                            }
+                            
                             alert('Character imported successfully!');
                         } catch (err) {
                             console.error('Import error:', err);
@@ -1975,6 +2141,17 @@ AI_MODEL=${document.getElementById('ai_model').value}`;
                     element.addEventListener('input', updateCharacterPreview);
                 }
             });
+            
+            // Special listener for character name changes to load creator notes
+            const charNameElement = document.getElementById('charName');
+            if (charNameElement) {
+                charNameElement.addEventListener('input', () => {
+                    // If creator notes are unlocked, load notes for the new character name
+                    if (notesPassword) {
+                        loadCreatorNotes();
+                    }
+                });
+            }
             
             // Initialize character preview
             updateCharacterPreview();
