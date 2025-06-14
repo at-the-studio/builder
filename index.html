@@ -567,7 +567,7 @@ async def get_ai_response(user_prompt, memory, mode="chat", **kwargs):
     mode_instructions = {
         "chat": "Respond naturally in character in first person with emojis or abbreviations like brb or lol.",
         "roleplay": "Respond in first person with actions in *asterisks*. Example: *I smile* That sounds great!",
-        "novel": f"Respond in third person narrative style. Example: {character_data.get('name', 'The character')} smiled at the suggestion. \\"That sounds great,\\" they said."
+        "novel": f"Respond in third person narrative style. Example: {character_data.get('name', 'The character')} smiled at the suggestion. 'That sounds great,' they said."
     }
     
     system_message = f"""You are {character_data.get('name', 'AI')}.
