@@ -1297,6 +1297,11 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
             // Handle optional system prompt parts
             const postHistory = document.getElementById('post_history_instructions').value;
             finalCode = finalCode.replace('%%ADDITIONAL_SYSTEM_PROMPT%%', postHistory);
+            
+            // Decode HTML entities to prevent syntax errors
+            finalCode = finalCode.replace(/&lt;/g, '<');
+            finalCode = finalCode.replace(/&gt;/g, '>');
+            finalCode = finalCode.replace(/&amp;/g, '&');
 
             return finalCode;
         }
