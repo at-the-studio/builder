@@ -1936,44 +1936,54 @@ AI_MODEL=${document.getElementById('ai_model').value}`;
             URL.revokeObjectURL(link.href);
         }
 
-        async function downloadBot(event) {
+        function downloadBotFile(filename, content) {
+            const button = document.createElement('button');
+            button.className = 'bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mr-2 mb-2';
+            button.textContent = `Download ${filename}`;
+            button.onclick = () => downloadFile(filename, content);
+            return button;
+        }
+
+        function showDownloadButtons() {
             const memoryType = document.querySelector('input[name="memory_type"]:checked').value;
             
-            // Show a progress message
-            const button = event.target.closest('button');
-            const originalText = button.innerHTML;
-            button.disabled = true;
-            button.innerHTML = '<svg class="inline-block w-8 h-8 mr-3 animate-spin" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Downloading files...';
+            // Create download container
+            const downloadContainer = document.createElement('div');
+            downloadContainer.className = 'text-center mt-8 p-6 bg-gray-800 rounded-lg';
+            downloadContainer.innerHTML = '<h3 class="text-2xl font-bold mb-4">Download Your Bot Files</h3><p class="mb-4 text-gray-300">Click each button to download the files individually:</p>';
             
-            try {
-                // Download core files with delays to avoid browser blocking
-                downloadFile('character.json', generateSillyTavernCard());
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                downloadFile('app.py', generateAppPy());
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                downloadFile('requirements.txt', generateRequirements());
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                downloadFile('.env', generateEnvFile());
-                
-                // Download memory service for advanced mode
-                if (memoryType === 'advanced') {
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    downloadFile('memory_service.py', generateMemoryService());
-                }
-                
-                // Wait a bit before showing closing screen
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                showClosingScreen();
-            } catch (error) {
-                console.error('Download error:', error);
-                alert('Error downloading files. Please try again or download them one at a time.');
-            } finally {
-                button.disabled = false;
-                button.innerHTML = originalText;
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'flex flex-wrap justify-center gap-2';
+            
+            // Add download buttons for each file
+            buttonContainer.appendChild(downloadBotFile('character.json', generateSillyTavernCard()));
+            buttonContainer.appendChild(downloadBotFile('app.py', generateAppPy()));
+            buttonContainer.appendChild(downloadBotFile('requirements.txt', generateRequirements()));
+            buttonContainer.appendChild(downloadBotFile('.env', generateEnvFile()));
+            
+            if (memoryType === 'advanced') {
+                buttonContainer.appendChild(downloadBotFile('memory_service.py', generateMemoryService()));
             }
+            
+            downloadContainer.appendChild(buttonContainer);
+            
+            // Add continue button
+            const continueBtn = document.createElement('button');
+            continueBtn.className = 'bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mt-6';
+            continueBtn.textContent = 'Continue to Credits';
+            continueBtn.onclick = showClosingScreen;
+            downloadContainer.appendChild(continueBtn);
+            
+            // Replace the form with download buttons
+            const form = document.querySelector('form');
+            form.parentNode.replaceChild(downloadContainer, form);
+        }
+
+        async function downloadBot(event) {
+            event.preventDefault();
+            
+            // Show the individual download buttons instead of trying to download all at once
+            showDownloadButtons();
         }
 
         // Add event listeners for real-time updates
