@@ -1240,7 +1240,7 @@ async def on_reaction_add(reaction, user):
     message = reaction.message
     emoji = str(reaction.emoji)
     
-    if emoji == " ":  # Regenerate
+    if emoji == "💫":  # Regenerate
         if message.author == bot.user and message.reference:
             try:
                 original_msg = await message.channel.fetch_message(message.reference.message_id)
@@ -1317,7 +1317,7 @@ async def deactivate(interaction: discord.Interaction):
 @bot.tree.command(name="start", description="Start a fresh conversation")
 async def start(interaction: discord.Interaction):
     user_id = interaction.user.id
-    channel_id = interaction.channel_id
+    channel_id = interaction.channel.id
     key = f"{user_id}_{channel_id}"
     user_memories[key] = []
     save_user_memory(user_id, channel_id, [])
@@ -1380,7 +1380,7 @@ async def feedback(interaction: discord.Interaction):
 @bot.tree.command(name="clear", description="Clear recent context while keeping memories")
 async def clear(interaction: discord.Interaction):
     user_id = interaction.user.id
-    channel_id = interaction.channel_id
+    channel_id = interaction.channel.id
     key = f"{user_id}_{channel_id}"
     user_memories[key] = []
     save_user_memory(user_id, channel_id, [])
@@ -1447,7 +1447,7 @@ async def info(ctx):
     # Reaction controls
     embed.add_field(
         name="Reaction Controls",
-        value="• 💫 - Regenerate last response\\n• 🗑️ - Delete message\\n• 🔇 - Message is ignored",
+        value="• � - Regenerate last response\\n• 🗑️ - Delete message\\n• 🔇 - Message is ignored",
         inline=False
     )
     
@@ -1851,7 +1851,7 @@ async def deactivate(interaction: discord.Interaction):
 @bot.tree.command(name="start", description="Start a fresh conversation")
 async def start(interaction: discord.Interaction):
     user_id = interaction.user.id
-    channel_id = interaction.channel_id
+    channel_id = interaction.channel.id
     
     # Clear active conversation for this user
     active_file = f"memories/{user_id}_{channel_id}_active.json"
@@ -1877,7 +1877,7 @@ async def private(interaction: discord.Interaction):
 @bot.tree.command(name="remember", description="Mark recent messages as important to remember")
 async def remember(interaction: discord.Interaction):
     user_id = interaction.user.id
-    channel_id = interaction.channel_id
+    channel_id = interaction.channel.id
     
     # Force a summary of current conversation for this user
     active_file = f"memories/{user_id}_{channel_id}_active.json"
@@ -1904,7 +1904,7 @@ async def feedback(interaction: discord.Interaction):
 @bot.tree.command(name="clear", description="Clear recent context while keeping memories")
 async def clear(interaction: discord.Interaction):
     user_id = interaction.user.id
-    channel_id = interaction.channel_id
+    channel_id = interaction.channel.id
     
     # Clear active conversation but keep summaries for this user
     active_file = f"memories/{user_id}_{channel_id}_active.json"
@@ -2228,4 +2228,3 @@ AI_MODEL=${document.getElementById('ai_model').value}`;
     </script>
 </body>
 </html>
- 
