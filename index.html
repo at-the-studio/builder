@@ -343,11 +343,30 @@
                     </p>
                 </div>
                 <div class="text-center">
-                    <button onclick="downloadBot(event)" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-500 font-bold rounded-lg text-xl px-10 py-5 text-center shadow-lg transform hover:scale-105 transition-all">
-                        <svg class="inline-block w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Show Individual Download Buttons
+                    <h3 class="text-2xl font-bold mb-4">Download Your Bot Files</h3>
+                    <p class="mb-4 text-gray-300">Click each button to download the files individually:</p>
+                    
+                    <div class="flex flex-wrap justify-center gap-2 mb-6">
+                        <button onclick="downloadFile('character.json', generateSillyTavernCard())" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Download character.json
+                        </button>
+                        <button onclick="downloadFile('app.py', generateAppPy())" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Download app.py
+                        </button>
+                        <button onclick="downloadFile('requirements.txt', generateRequirements())" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Download requirements.txt
+                        </button>
+                        <button onclick="downloadFile('.env', generateEnvFile())" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                            Download .env
+                        </button>
+                        <button id="memory-download-btn" onclick="downloadFile('memory_service.py', generateMemoryService())" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors" style="display: none;">
+                            Download memory_service.py
+                        </button>
+                    </div>
+                    
+                    <button onclick="showClosingScreen()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                        Continue to Credits
                     </button>
-                    <p class="text-xs text-gray-400 mt-2">Click to see individual download buttons for each file (no bulk download)</p>
                 </div>
             </section>
         </main>
@@ -437,13 +456,16 @@
             const groqSetup = document.getElementById('groq-setup');
             const advancedRadio = document.querySelector('input[name="memory_type"][value="advanced"]');
             const fileCount = document.getElementById('file-count');
+            const memoryDownloadBtn = document.getElementById('memory-download-btn');
             
             if (advancedRadio.checked) {
                 groqSetup.classList.remove('hidden');
                 fileCount.textContent = '5';
+                if (memoryDownloadBtn) memoryDownloadBtn.style.display = 'inline-block';
             } else {
                 groqSetup.classList.add('hidden');
                 fileCount.textContent = '4';
+                if (memoryDownloadBtn) memoryDownloadBtn.style.display = 'none';
             }
         }
 
@@ -1936,55 +1958,6 @@ AI_MODEL=${document.getElementById('ai_model').value}`;
             URL.revokeObjectURL(link.href);
         }
 
-        function downloadBotFile(filename, content) {
-            const button = document.createElement('button');
-            button.className = 'bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors mr-2 mb-2';
-            button.textContent = `Download ${filename}`;
-            button.onclick = () => downloadFile(filename, content);
-            return button;
-        }
-
-        function showDownloadButtons() {
-            const memoryType = document.querySelector('input[name="memory_type"]:checked').value;
-            
-            // Create download container
-            const downloadContainer = document.createElement('div');
-            downloadContainer.className = 'text-center mt-8 p-6 bg-gray-800 rounded-lg';
-            downloadContainer.innerHTML = '<h3 class="text-2xl font-bold mb-4">Download Your Bot Files</h3><p class="mb-4 text-gray-300">Click each button to download the files individually:</p>';
-            
-            const buttonContainer = document.createElement('div');
-            buttonContainer.className = 'flex flex-wrap justify-center gap-2';
-            
-            // Add download buttons for each file
-            buttonContainer.appendChild(downloadBotFile('character.json', generateSillyTavernCard()));
-            buttonContainer.appendChild(downloadBotFile('app.py', generateAppPy()));
-            buttonContainer.appendChild(downloadBotFile('requirements.txt', generateRequirements()));
-            buttonContainer.appendChild(downloadBotFile('.env', generateEnvFile()));
-            
-            if (memoryType === 'advanced') {
-                buttonContainer.appendChild(downloadBotFile('memory_service.py', generateMemoryService()));
-            }
-            
-            downloadContainer.appendChild(buttonContainer);
-            
-            // Add continue button
-            const continueBtn = document.createElement('button');
-            continueBtn.className = 'bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors mt-6';
-            continueBtn.textContent = 'Continue to Credits';
-            continueBtn.onclick = showClosingScreen;
-            downloadContainer.appendChild(continueBtn);
-            
-            // Replace the form with download buttons
-            const form = document.querySelector('form');
-            form.parentNode.replaceChild(downloadContainer, form);
-        }
-
-        async function downloadBot(event) {
-            event.preventDefault();
-            
-            // Show the individual download buttons instead of trying to download all at once
-            showDownloadButtons();
-        }
 
         // Add event listeners for real-time updates
         document.addEventListener('DOMContentLoaded', () => {
