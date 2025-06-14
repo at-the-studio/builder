@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Bot Builder (Discord + Silly Tavern)</title>
+    <title>Decentralized Discord AI Bot Builder (Silly Tavern compatible)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,7 +56,7 @@
 
     <!-- Opening Screen -->
     <div id="opening-screen" class="overlay-screen active" onclick="this.classList.add('fade-out')">
-        <img src="https://github.com/mjladiosa/builder/blob/main/openingscene.jpg" alt="Welcome to Llama Brain's AI Bot Builder" class="max-w-xs md:max-w-sm rounded-lg">
+        <img src="https://i.imgur.com/5vgLKMj.png" alt="Welcome to Llama Brain's AI Bot Builder" class="max-w-xs md:max-w-sm rounded-lg">
         <p class="text-xl mt-4 text-gray-300">Click anywhere to continue</p>
     </div>
     
@@ -317,8 +317,8 @@
                     <button onclick="importCharacter()" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
                         📁 Import Character
                     </button>
-                    <button onclick="exportCharacter()" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
-                        💾 Export Character
+                    <button onclick="exportCharacter()" class="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                        💾 Export Character Only (JSON)
                     </button>
                 </div>
                 <h3 class="text-xl font-semibold mb-3 text-gray-300">Download Bot Files</h3>
@@ -332,6 +332,9 @@
                     <p class="text-sm text-indigo-300">
                         <strong>Note:</strong> Your browser will download <span id="file-count">4</span> separate files. Please save them all in the same new folder for the bot to work correctly.
                     </p>
+                    <p class="text-sm text-indigo-200 mt-2">
+                        ⚠️ <strong>Browser may block multiple downloads!</strong> If you only get 1 file, check your browser's popup blocker or allow multiple downloads when prompted.
+                    </p>
                 </div>
                 <div class="bg-red-900/50 border border-red-700 rounded-lg p-4 mb-8 text-center">
                     <p class="text-lg font-bold text-red-300 mb-2">🚨 CRITICAL: RENAME THE .ENV FILE! 🚨</p>
@@ -340,10 +343,11 @@
                     </p>
                 </div>
                 <div class="text-center">
-                    <button onclick="downloadBot()" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-500 font-medium rounded-lg text-lg px-8 py-4 text-center">
-                        <svg class="inline-block w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Download Bot Files
+                    <button onclick="downloadBot(event)" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-500 font-bold rounded-lg text-xl px-10 py-5 text-center shadow-lg transform hover:scale-105 transition-all">
+                        <svg class="inline-block w-8 h-8 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download ALL Bot Files (4-5 files)
                     </button>
+                    <p class="text-xs text-gray-400 mt-2">This downloads app.py, character.json, requirements.txt, .env and optionally memory_service.py</p>
                 </div>
             </section>
         </main>
@@ -1932,21 +1936,44 @@ AI_MODEL=${document.getElementById('ai_model').value}`;
             URL.revokeObjectURL(link.href);
         }
 
-        function downloadBot() {
+        async function downloadBot(event) {
             const memoryType = document.querySelector('input[name="memory_type"]:checked').value;
             
-            // Download core files
-            downloadFile('character.json', generateSillyTavernCard());
-            downloadFile('app.py', generateAppPy());
-            downloadFile('requirements.txt', generateRequirements());
-            downloadFile('.env', generateEnvFile());
+            // Show a progress message
+            const button = event.target.closest('button');
+            const originalText = button.innerHTML;
+            button.disabled = true;
+            button.innerHTML = '<svg class="inline-block w-8 h-8 mr-3 animate-spin" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Downloading files...';
             
-            // Download memory service for advanced mode
-            if (memoryType === 'advanced') {
-                downloadFile('memory_service.py', generateMemoryService());
+            try {
+                // Download core files with delays to avoid browser blocking
+                downloadFile('character.json', generateSillyTavernCard());
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                downloadFile('app.py', generateAppPy());
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                downloadFile('requirements.txt', generateRequirements());
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                downloadFile('.env', generateEnvFile());
+                
+                // Download memory service for advanced mode
+                if (memoryType === 'advanced') {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    downloadFile('memory_service.py', generateMemoryService());
+                }
+                
+                // Wait a bit before showing closing screen
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                showClosingScreen();
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Error downloading files. Please try again or download them one at a time.');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalText;
             }
-            
-            showClosingScreen();
         }
 
         // Add event listeners for real-time updates
