@@ -348,6 +348,18 @@
                         <label for="ai_model" class="block mb-2 text-sm font-medium text-gray-300">AI Model</label>
                         <input type="text" id="ai_model" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., google/gemini-pro or llama3-8b-8192">
                     </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="temperature" class="block mb-2 text-sm font-medium text-gray-300">Temperature</label>
+                            <input type="number" id="temperature" step="0.1" min="0.0" max="2.0" value="0.7" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                            <p class="mt-1 text-xs text-gray-400">Controls creativity: 0.0 = focused, 2.0 = very creative</p>
+                        </div>
+                        <div>
+                            <label for="top_p" class="block mb-2 text-sm font-medium text-gray-300">Top-p</label>
+                            <input type="number" id="top_p" step="0.05" min="0.0" max="1.0" value="0.9" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                            <p class="mt-1 text-xs text-gray-400">Controls vocabulary: 0.1 = limited, 1.0 = full range</p>
+                        </div>
+                    </div>
                     <div>
                         <label for="command_prefix" class="block mb-2 text-sm font-medium text-gray-300">Command Prefix (Optional)</label>
                         <input type="text" id="command_prefix" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" value="!" placeholder="!">
@@ -509,6 +521,10 @@ channel_settings = {}
 active_channels = set()
 private_mode = {}
 
+# AI Model Parameters
+AI_TEMPERATURE = %%TEMPERATURE%%
+AI_TOP_P = %%TOP_P%%
+
 channel_message_history = defaultdict(list)
 user_slash_cooldowns = defaultdict(float)
 user_reaction_cooldowns = defaultdict(float)
@@ -601,7 +617,8 @@ Response Mode: {mode_instructions.get(mode, mode_instructions["chat"])}
         "model": AI_MODEL, 
         "messages": messages,
         "max_tokens": 500,  # Limit response tokens to control costs
-        "temperature": 0.8
+        "temperature": AI_TEMPERATURE,
+        "top_p": AI_TOP_P
     }
 
     try:
@@ -721,7 +738,7 @@ async def on_reaction_add(reaction, user):
 async def info(ctx):
     embed = discord.Embed(title=f"%%CHAR_NAME%% Bot Information", description=f"I'm %%CHAR_NAME%%, created with the Universal Bot Builder!", color=discord.Color.blurple())
     embed.add_field(name="Character", value=f"**Name:** %%CHAR_NAME%%\\n**Creator:** {character_data.get('creator', 'Unknown')}", inline=False)
-    embed.add_field(name="Slash Commands", value="• `/activate`\\n• `/deactivate`\\n• `/start`\\n• `/private`\\n• `/clear`\\n• `/feedback`", inline=False)
+    embed.add_field(name="Slash Commands", value="• `/activate`\\n• `/deactivate`\\n• `/start`\\n• `/private`\\n• `/clear`\\n• `/memory`\\n• `/temperature`\\n• `/top_p`\\n• `/model_settings`\\n• `/feedback`", inline=False)
     embed.add_field(name="Reaction Controls", value="• 💫 - Regenerate last response\\n• 🗑️ - Delete message\\n• 🔇 - Message is ignored", inline=False)
     embed.set_footer(text="Decentralized Discord AI Bot Builder ◈ Giving users control of their own data")
     await ctx.send(embed=embed)
@@ -857,6 +874,52 @@ async def private(interaction: discord.Interaction):
     settings["active"] = True
     await interaction.response.send_message(f"🔒 Private mode enabled for {interaction.user.mention}. Only you can chat with %%CHAR_NAME%% here.", ephemeral=True)
 
+@bot.tree.command(name="memory", description="View current memory/context")
+async def memory(interaction: discord.Interaction):
+    user_id = interaction.user.id
+    channel_id = interaction.channel.id
+    key = f"{user_id}_{channel_id}"
+    
+    if key in user_memories and user_memories[key]:
+        recent_count = min(5, len(user_memories[key]))
+        recent_messages = user_memories[key][-recent_count:]
+        memory_text = "\\n".join([f"**{msg['role'].title()}:** {msg['content'][:100]}..." if len(msg['content']) > 100 else f"**{msg['role'].title()}:** {msg['content']}" for msg in recent_messages])
+        
+        embed = discord.Embed(title="💭 Recent Memory", description=memory_text, color=0x5865F2)
+        embed.set_footer(text=f"Showing last {recent_count} messages")
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    else:
+        await interaction.response.send_message("📝 No conversation memory found for this channel.", ephemeral=True)
+
+@bot.tree.command(name="temperature", description="Adjust AI creativity (0.0-2.0)")
+async def temperature(interaction: discord.Interaction, value: float):
+    global AI_TEMPERATURE
+    if not (0.0 <= value <= 2.0):
+        await interaction.response.send_message("❌ Temperature must be between 0.0 and 2.0", ephemeral=True)
+        return
+    
+    AI_TEMPERATURE = value
+    await interaction.response.send_message(f"🌡️ Temperature set to {value} (0.0=focused, 2.0=very creative)", ephemeral=True)
+
+@bot.tree.command(name="top_p", description="Adjust AI vocabulary diversity (0.0-1.0)")
+async def top_p(interaction: discord.Interaction, value: float):
+    global AI_TOP_P
+    if not (0.0 <= value <= 1.0):
+        await interaction.response.send_message("❌ Top-p must be between 0.0 and 1.0", ephemeral=True)
+        return
+    
+    AI_TOP_P = value
+    await interaction.response.send_message(f"🎯 Top-p set to {value} (0.1=limited vocab, 1.0=full range)", ephemeral=True)
+
+@bot.tree.command(name="model_settings", description="View current AI model settings")
+async def model_settings(interaction: discord.Interaction):
+    embed = discord.Embed(title="🤖 AI Model Settings", color=0x00ff00)
+    embed.add_field(name="Model", value=AI_MODEL, inline=True)
+    embed.add_field(name="Temperature", value=f"{getattr(bot, 'AI_TEMPERATURE', 0.7)}", inline=True)
+    embed.add_field(name="Top-p", value=f"{getattr(bot, 'AI_TOP_P', 0.9)}", inline=True)
+    embed.add_field(name="API Endpoint", value=API_ENDPOINT[:50] + "..." if len(API_ENDPOINT) > 50 else API_ENDPOINT, inline=False)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
 @bot.tree.command(name="feedback", description="Submit beta testing feedback")
 async def feedback(interaction: discord.Interaction):
     await interaction.response.send_modal(FeedbackModal())
@@ -918,6 +981,67 @@ async def private(interaction: discord.Interaction):
         get_channel_settings(thread.id)["active"] = True
     except Exception as e:
         await interaction.response.send_message(f"❌ Failed to create private thread: {e}", ephemeral=True)
+
+@bot.tree.command(name="memory", description="View current memory and conversation summaries")
+async def memory(interaction: discord.Interaction):
+    user_id = interaction.user.id
+    channel_id = interaction.channel.id
+    active_file = f"memories/{user_id}_{channel_id}_active.json"
+    summaries_file = f"memories/{user_id}_{channel_id}_summaries.json"
+    
+    embed = discord.Embed(title="💭 Memory Status", color=0x5865F2)
+    
+    # Check active conversation
+    if os.path.exists(active_file):
+        with open(active_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        embed.add_field(name="Recent Messages", value=f"{len(data.get('messages', []))} messages", inline=True)
+        embed.add_field(name="Token Usage", value=f"{data.get('total_tokens', 0)} tokens", inline=True)
+    else:
+        embed.add_field(name="Recent Messages", value="No active conversation", inline=True)
+    
+    # Check summaries
+    if os.path.exists(summaries_file):
+        with open(summaries_file, 'r', encoding='utf-8') as f:
+            summaries = json.load(f).get('memories', [])
+        embed.add_field(name="Stored Memories", value=f"{len(summaries)} conversation summaries", inline=True)
+        
+        if summaries:
+            latest = summaries[-1]
+            embed.add_field(name="Latest Memory", value=f"[{latest['date']}] {latest['summary'][:100]}..." if len(latest['summary']) > 100 else f"[{latest['date']}] {latest['summary']}", inline=False)
+    else:
+        embed.add_field(name="Stored Memories", value="No stored memories", inline=True)
+    
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+@bot.tree.command(name="temperature", description="Adjust AI creativity (0.0-2.0)")
+async def temperature(interaction: discord.Interaction, value: float):
+    global AI_TEMPERATURE
+    if not (0.0 <= value <= 2.0):
+        await interaction.response.send_message("❌ Temperature must be between 0.0 and 2.0", ephemeral=True)
+        return
+    
+    AI_TEMPERATURE = value
+    await interaction.response.send_message(f"🌡️ Temperature set to {value} (0.0=focused, 2.0=very creative)", ephemeral=True)
+
+@bot.tree.command(name="top_p", description="Adjust AI vocabulary diversity (0.0-1.0)")
+async def top_p(interaction: discord.Interaction, value: float):
+    global AI_TOP_P
+    if not (0.0 <= value <= 1.0):
+        await interaction.response.send_message("❌ Top-p must be between 0.0 and 1.0", ephemeral=True)
+        return
+    
+    AI_TOP_P = value
+    await interaction.response.send_message(f"🎯 Top-p set to {value} (0.1=limited vocab, 1.0=full range)", ephemeral=True)
+
+@bot.tree.command(name="model_settings", description="View current AI model settings")
+async def model_settings(interaction: discord.Interaction):
+    embed = discord.Embed(title="🤖 AI Model Settings", color=0x00ff00)
+    embed.add_field(name="Model", value=AI_MODEL, inline=True)
+    embed.add_field(name="Temperature", value=f"{getattr(bot, 'AI_TEMPERATURE', 0.7)}", inline=True)
+    embed.add_field(name="Top-p", value=f"{getattr(bot, 'AI_TOP_P', 0.9)}", inline=True)
+    embed.add_field(name="API Endpoint", value=API_ENDPOINT[:50] + "..." if len(API_ENDPOINT) > 50 else API_ENDPOINT, inline=False)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
 @bot.tree.command(name="feedback", description="Submit beta testing feedback")
 async def feedback(interaction: discord.Interaction):
@@ -1286,6 +1410,8 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
             const commandPrefix = document.getElementById('command_prefix').value || '!';
             const discordUserId = document.getElementById('discord_user_id')?.value || 'YOUR_DISCORD_ID'; // Fallback
             const memoryType = document.querySelector('input[name="memory_type"]:checked').value;
+            const temperature = document.getElementById('temperature').value || '0.7';
+            const topP = document.getElementById('top_p').value || '0.9';
 
             const memoryBlock = memoryType === 'advanced' 
                 ? document.getElementById('advanced-memory-block').innerHTML 
@@ -1301,6 +1427,8 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
             finalCode = finalCode.replace(/%%SAFE_CHAR_NAME%%/g, safeCharName);
             finalCode = finalCode.replace(/%%COMMAND_PREFIX%%/g, commandPrefix);
             finalCode = finalCode.replace(/%%DISCORD_USER_ID%%/g, discordUserId);
+            finalCode = finalCode.replace(/%%TEMPERATURE%%/g, temperature);
+            finalCode = finalCode.replace(/%%TOP_P%%/g, topP);
             finalCode = finalCode.replace('%%MEMORY_MANAGEMENT_BLOCK%%', memoryBlock);
             finalCode = finalCode.replace('%%SLASH_COMMANDS_BLOCK%%', slashCommandsBlock);
             
