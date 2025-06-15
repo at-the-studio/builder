@@ -88,13 +88,14 @@
 
     <div class="container mx-auto p-4 md:p-8 max-w-4xl">
         <header class="text-center mb-8">
-            <img src="https://github.com/mjladiosa/Discord_Bot_Builder/blob/main/assets/llama-brain-pic.png?raw=true" alt="Llama Brain" class="w-24 h-24 mx-auto mb-4 rounded-full border-4 border-indigo-500/50" onerror="this.onerror=null;this.src='https://placehold.co/100x100/1f2937/ffffff?text=LB';">
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Universal Bot Builder</h1>
+            <img src="https://i.imgur.com/wNp4o95.png" alt="Llama Brain" class="w-24 h-24 mx-auto mb-4 rounded-full border-4 border-indigo-500/50" onerror="this.onerror=null;this.src='https://placehold.co/100x100/1f2937/ffffff?text=LB';">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2">Llama Brain's AI Bot Builder</h1>
             <p class="text-lg text-gray-400">Create Discord bots with Silly Tavern compatible character cards.</p>
+            <p class="text-md text-gray-300 mt-2 font-medium">DIY AI - Your data stays private, and the blueprints will always be free.</p>
             <div class="mt-4 flex justify-center flex-wrap gap-4">
-                 <a href="https://ko-fi.com/thestudio" target="_blank" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Support on Ko-fi</a>
-                 <a href="https://discord.gg/fq77MNg87k" target="_blank" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition-colors">Bot Support Server</a>
-                 <a href="https://discord.gg/the-studio" target="_blank" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">The Studio Roleplay</a>
+                 💠<a href="https://ko-fi.com/thestudio" target="_blank" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Support on Ko-fi</a>💠
+                 <a href="https://discord.gg/fq77MNg87k" target="_blank" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded-lg transition-colors">Bot Support Server</a>💠
+                 <a href="https://discord.gg/the-studio" target="_blank" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">The Studio Roleplay</a>💠
             </div>
         </header>
 
@@ -106,7 +107,7 @@
                 <p class="mb-4 text-gray-400">Define your character's name, creator, and their detailed personality using the fields below.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="charName" class="block mb-2 text-sm font-medium text-gray-300">Character Name</label>
+                        <label for="charName" class="block mb-2 text-sm font-medium text-gray-300">💠Character Name</label>
                         <input type="text" id="charName" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Luna">
                     </div>
                     <div>
@@ -137,9 +138,20 @@
                         <p class="mt-2 text-xs text-gray-400">This system uses the variables {{user}} and {{char}} - Separate dialogue blocks with &lt;START&gt;</p>
                     </div>
                     <div>
-                        <label for="alternate_greetings" class="block mb-2 text-sm font-medium text-gray-300">💠Alternate Greetings (Optional)</label>
-                        <textarea id="alternate_greetings" rows="4" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="*Waves excitedly* Hey there!&#10;&#10;Oh, it's you again. *Smirks*"></textarea>
-                        <p class="mt-2 text-xs text-gray-400">Enter each alternate greeting on a new line. Leave blank to skip.</p>
+                        <label class="block mb-3 text-sm font-medium text-gray-300">💠Custom Keywords aka Soft Custom Commands (Optional)</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="keyword1_trigger" class="block mb-1 text-xs font-medium text-gray-400">Keyword/Trigger 1</label>
+                                <input type="text" id="keyword1_trigger" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 mb-2" placeholder="!server">
+                                <textarea id="keyword1_behavior" rows="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2" placeholder="If {{user}} mentions !server then {{char}} shares the gaming server link: discord.gg/example"></textarea>
+                            </div>
+                            <div>
+                                <label for="keyword2_trigger" class="block mb-1 text-xs font-medium text-gray-400">Keyword/Trigger 2</label>
+                                <input type="text" id="keyword2_trigger" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2 mb-2" placeholder="!quote">
+                                <textarea id="keyword2_behavior" rows="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2" placeholder="If {{user}} says !quote then {{char}} shares an inspirational quote about their interests"></textarea>
+                            </div>
+                        </div>
+                        <p class="mt-2 text-xs text-gray-400">Create AI-driven keyword behaviors, formatted as if/then statements. The AI will naturally respond to these triggers when they appear in conversation.</p>
                     </div>
                     <div>
                         <label for="tags" class="block mb-2 text-sm font-medium text-gray-300">💠Character Tags</label>
@@ -151,7 +163,7 @@
                         <textarea id="post_history_instructions" rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Keep responses short and playful. Focus on emotional connection."></textarea>
                     </div>
                     <div>
-                        <label for="relationships" class="block mb-2 text-sm font-medium text-gray-300">Relationships (Optional)</label>
+                        <label for="relationships" class="block mb-2 text-sm font-medium text-gray-300">💠Relationships (Optional)</label>
                         <textarea id="relationships" rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Best friend: Alex\nRival: Jordan\nMentor: Dr. Smith"></textarea>
                     </div>
                 </div>
@@ -350,13 +362,13 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="temperature" class="block mb-2 text-sm font-medium text-gray-300">💠Temperature</label>
-                            <input type="number" id="temperature" step="0.1" min="0.0" max="2.0" value="0.7" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                            <label for="temperature" class="block mb-2 text-sm font-medium text-gray-300">💠Temperature (Optional)</label>
+                            <input type="number" id="temperature" step="0.1" min="0.0" max="2.0" value="" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="Leave empty for API default">
                             <p class="mt-1 text-xs text-gray-400">Controls creativity: 0.0 = focused, 2.0 = very creative</p>
                         </div>
                         <div>
-                            <label for="top_p" class="block mb-2 text-sm font-medium text-gray-300">💠Top-p</label>
-                            <input type="number" id="top_p" step="0.05" min="0.0" max="1.0" value="0.9" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                            <label for="top_p" class="block mb-2 text-sm font-medium text-gray-300">💠Top-p (Optional)</label>
+                            <input type="number" id="top_p" step="0.05" min="0.0" max="1.0" value="" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="Leave empty for API default">
                             <p class="mt-1 text-xs text-gray-400">Controls vocabulary: 0.1 = limited, 1.0 = full range</p>
                         </div>
                     </div>
@@ -395,12 +407,12 @@
                  <p class="mb-4 text-gray-400">Everything is ready! Click the button below to download your bot files.</p>
                  <div class="disclaimer bg-gray-700/50 border border-gray-600 rounded-lg p-4 mb-6 text-center">
                     <p class="text-sm text-gray-400">
-                        <strong>Disclaimer:</strong> 💠This tool does not store any of your data. Once you download the files, your bot and its data exist only on your device. You are solely responsible for the bot you create and how it is used.💠
+                        <strong>💠Disclaimer:</strong>This tool does not store any of your data. Once you download the files, your bot and its data exist only on your device. You are solely responsible for the bot you create and how it is used.
                     </p>
                 </div>
                  <div class="download-note bg-indigo-900/50 border border-indigo-700 rounded-lg p-4 mb-4 text-center">
                     <p class="text-sm text-indigo-300">
-                        <strong>Note:</strong> Your browser will download <span id="file-count">4</span> separate files. Please save them all in the same new folder for the bot to work correctly.
+                        <strong>💠Note:</strong> Your browser will download <span id="file-count">4</span> separate files. Please save them all in the same new folder for the bot to work correctly.
                     </p>
                     <p class="text-sm text-indigo-200 mt-2">
                         ⚠️ <strong>Browser may block multiple downloads!</strong> If you only get 1 file, check your browser's popup blocker or allow multiple downloads when prompted.
@@ -409,7 +421,7 @@
                 <div class="bg-red-900/50 border border-red-700 rounded-lg p-4 mb-8 text-center">
                     <p class="text-lg font-bold text-red-300 mb-2">🚨 CRITICAL: RENAME THE .ENV FILE! 🚨</p>
                     <p class="text-sm text-red-200">
-                        Your browser downloads the file as <code class="bg-red-800 px-1 rounded">.env.txt</code> - you MUST rename it to just <code class="bg-red-800 px-1 rounded">.env</code> (remove the .txt) or your bot will not work!
+                        Your browser downloads the file as <code class="bg-red-800 px-1 rounded">.env.txt</code> - you MUST rename it to just <code class="bg-red-800 px-1 rounded">.env</code> (remove the .txt) or your bot will not work! When the file prompts you to save it onto your computer, just change it right there to .env and save.
                     </p>
                 </div>
                 <div class="text-center">
@@ -444,7 +456,7 @@
         <footer class="text-center mt-8 text-sm text-gray-500">
             <p>💠Built in collaboration with MJ, Gemini 2.5 and Claude 4💠</p>
             <p class="mt-4">
-                <a href="https://maybejmaybe.com/llamabrain-tools">💠Llama Brain's AI Bot Builder💠</a> © 2025 by <a href="https://creativecommons.org">💠mjladiosa💠</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International</a><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;">
+                <a href="https://maybejmaybe.com/llamabrain-tools">💠Llama Brain's AI Bot Builder💠</a> © 2025 by <a href="https://creativecommons.org">💠mjladiosa💠</a> is licensed under <p><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution 💠 NonCommercial-ShareAlike 4.0 💠 International</a>💠</p><img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/nc.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;"><img src="https://mirrors.creativecommons.org/presskit/icons/sa.svg" style="max-width: 1em;max-height:1em;margin-left: .2em;">
             </p>
         </footer>
     </div>
@@ -522,8 +534,8 @@ active_channels = set()
 private_mode = {}
 
 # AI Model Parameters (None = use API defaults)
-AI_TEMPERATURE = None
-AI_TOP_P = None
+AI_TEMPERATURE = %%TEMPERATURE%%
+AI_TOP_P = %%TOP_P%%
 
 channel_message_history = defaultdict(list)
 user_slash_cooldowns = defaultdict(float)
@@ -589,6 +601,7 @@ async def get_ai_response(user_prompt, memory, mode="chat", **kwargs):
 Description: {character_data.get('description', '')[:500]}
 Personality: {character_data.get('personality', '')[:300]}
 Scenario: {character_data.get('scenario', '')[:300]}
+%%CUSTOM_KEYWORDS%%
 %%ADDITIONAL_SYSTEM_PROMPT%%
 
 Guidelines:
@@ -1297,6 +1310,20 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
             const tags = escapeHtml(document.getElementById('tags').value || 'No tags');
             const customSections = getCustomSections();
             
+            // Collect keywords for preview
+            const keywords = [];
+            const keyword1Trigger = document.getElementById('keyword1_trigger').value.trim();
+            const keyword1Behavior = document.getElementById('keyword1_behavior').value.trim();
+            const keyword2Trigger = document.getElementById('keyword2_trigger').value.trim();
+            const keyword2Behavior = document.getElementById('keyword2_behavior').value.trim();
+            
+            if (keyword1Trigger && keyword1Behavior) {
+                keywords.push({trigger: keyword1Trigger, behavior: keyword1Behavior});
+            }
+            if (keyword2Trigger && keyword2Behavior) {
+                keywords.push({trigger: keyword2Trigger, behavior: keyword2Behavior});
+            }
+            
             let customSectionsHtml = '';
             if (Object.keys(customSections).length > 0) {
                 customSectionsHtml = '<div class="mt-3 pt-3 border-t border-gray-600"><span class="font-medium text-gray-300">Custom Sections:</span>';
@@ -1307,6 +1334,17 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
                     customSectionsHtml += `<div class="mt-1"><span class="text-xs font-medium text-indigo-400">${safeName}:</span> <span class="text-xs text-gray-400">${safeContent}</span></div>`;
                 }
                 customSectionsHtml += '</div>';
+            }
+            
+            let keywordsHtml = '';
+            if (keywords.length > 0) {
+                keywordsHtml = '<div class="mt-3 pt-3 border-t border-gray-600"><span class="font-medium text-gray-300">Custom Keywords:</span>';
+                keywords.forEach(keyword => {
+                    const safeTrigger = escapeHtml(keyword.trigger);
+                    const safeBehavior = escapeHtml(keyword.behavior.length > 60 ? keyword.behavior.substring(0, 60) + '...' : keyword.behavior);
+                    keywordsHtml += `<div class="mt-1"><span class="text-xs font-medium text-indigo-400">${safeTrigger}:</span> <span class="text-xs text-gray-400">${safeBehavior}</span></div>`;
+                });
+                keywordsHtml += '</div>';
             }
             
             const preview = document.getElementById('character-preview');
@@ -1325,6 +1363,7 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
                         <p class="text-gray-400">${personality.length > 100 ? personality.substring(0, 100) + '...' : personality}</p>
                     </div>
                     ${customSectionsHtml}
+                    ${keywordsHtml}
                 </div>
             `;
         }
@@ -1401,9 +1440,22 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
         // --- FILE GENERATION ---
         
         function generateSillyTavernCard() {
-            const alternateGreetings = document.getElementById('alternate_greetings').value.trim();
             const tagsStr = document.getElementById('tags').value.trim();
             const customSections = getCustomSections();
+            
+            // Collect keywords
+            const keywords = [];
+            const keyword1Trigger = document.getElementById('keyword1_trigger').value.trim();
+            const keyword1Behavior = document.getElementById('keyword1_behavior').value.trim();
+            const keyword2Trigger = document.getElementById('keyword2_trigger').value.trim();
+            const keyword2Behavior = document.getElementById('keyword2_behavior').value.trim();
+            
+            if (keyword1Trigger && keyword1Behavior) {
+                keywords.push({trigger: keyword1Trigger, behavior: keyword1Behavior});
+            }
+            if (keyword2Trigger && keyword2Behavior) {
+                keywords.push({trigger: keyword2Trigger, behavior: keyword2Behavior});
+            }
             
             return JSON.stringify({
                 spec: 'chara_card_v2',
@@ -1421,8 +1473,9 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
                     tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t) : [],
                     creator: document.getElementById('creator').value,
                     character_version: "1.0",
-                    alternate_greetings: alternateGreetings ? alternateGreetings.split('\\n\\n').filter(g => g.trim()) : [],
+                    alternate_greetings: [],
                     relationships: document.getElementById('relationships').value,
+                    custom_keywords: keywords,
                     custom_fields: customSections
                 }
             }, null, 2);
@@ -1434,8 +1487,8 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
             const commandPrefix = document.getElementById('command_prefix').value || '!';
             const discordUserId = document.getElementById('discord_user_id')?.value || 'YOUR_DISCORD_ID'; // Fallback
             const memoryType = document.querySelector('input[name="memory_type"]:checked').value;
-            const temperature = document.getElementById('temperature').value || '0.7';
-            const topP = document.getElementById('top_p').value || '0.9';
+            const temperature = document.getElementById('temperature').value;
+            const topP = document.getElementById('top_p').value;
 
             const memoryBlock = memoryType === 'advanced' 
                 ? document.getElementById('advanced-memory-block').innerHTML 
@@ -1445,12 +1498,34 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
                 ? document.getElementById('advanced-slash-commands').innerHTML 
                 : document.getElementById('simple-slash-commands').innerHTML;
 
+            // Collect custom keywords
+            const keywords = [];
+            const keyword1Trigger = document.getElementById('keyword1_trigger').value.trim();
+            const keyword1Behavior = document.getElementById('keyword1_behavior').value.trim();
+            const keyword2Trigger = document.getElementById('keyword2_trigger').value.trim();
+            const keyword2Behavior = document.getElementById('keyword2_behavior').value.trim();
+            
+            if (keyword1Trigger && keyword1Behavior) {
+                keywords.push(keyword1Behavior);
+            }
+            if (keyword2Trigger && keyword2Behavior) {
+                keywords.push(keyword2Behavior);
+            }
+            
+            // Generate keywords section for system prompt
+            const keywordsSection = keywords.length > 0 
+                ? `\\n\\nCustom Behaviors:\\n- ${keywords.join('\\n- ')}\\n\\nWatch for these keywords and respond accordingly when they appear in conversation.`
+                : '';
+
             let finalCode = document.getElementById('app-py-template').innerHTML;
             
             finalCode = finalCode.replace(/%%CHAR_NAME%%/g, charName);
             finalCode = finalCode.replace(/%%SAFE_CHAR_NAME%%/g, safeCharName);
             finalCode = finalCode.replace(/%%COMMAND_PREFIX%%/g, commandPrefix);
             finalCode = finalCode.replace(/%%DISCORD_USER_ID%%/g, discordUserId);
+            finalCode = finalCode.replace(/%%CUSTOM_KEYWORDS%%/g, keywordsSection);
+            finalCode = finalCode.replace(/%%TEMPERATURE%%/g, temperature || 'None');
+            finalCode = finalCode.replace(/%%TOP_P%%/g, topP || 'None');
             finalCode = finalCode.replace('%%MEMORY_MANAGEMENT_BLOCK%%', memoryBlock);
             finalCode = finalCode.replace('%%SLASH_COMMANDS_BLOCK%%', slashCommandsBlock);
             
@@ -1637,7 +1712,7 @@ AI_MODEL=${document.getElementById('ai_model').value}`;
                 }
             }, 2000);
             
-            ['charName', 'description', 'personality', 'tags'].forEach(id => {
+            ['charName', 'description', 'personality', 'tags', 'keyword1_trigger', 'keyword1_behavior', 'keyword2_trigger', 'keyword2_behavior'].forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
                     element.addEventListener('input', updateCharacterPreview);
