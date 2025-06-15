@@ -580,11 +580,8 @@ def check_reaction_cooldown(user_id):
 async def get_ai_response(user_prompt, memory, mode="chat", **kwargs):
     is_creator = str(kwargs.get('user_id')) == str(CREATOR_ID)
     
-    mode_instructions = {
-        "chat": "Respond naturally in character in first person with emojis or abbreviations like brb or lol.",
-        "roleplay": "Respond in first person with actions in *asterisks*. Example: *I smile* That sounds great!",
-        "novel": f"Respond in third person narrative style. Example: {character_data.get('name', 'The character')} smiled at the suggestion. 'That sounds great,' they said."
-    }
+    # Dynamic instruction that adapts to user's chat style
+    dynamic_instruction = "dynamically follow the user's chat style and change with them. If they choose to speak in narrative third person limited perspective, and using quotation marks around dialogue and italics for thoughts, then you will also. If they choose to chat with you in first person as if you are chatting in a text message or online, then you will also. If they choose to chat with you in roleplay using italics for actions and dialogue in plain text, then you will also."
     
     # Create a more concise system message to avoid token limits
     system_message = f"""You are {character_data.get('name', 'AI')}.
@@ -604,7 +601,7 @@ Guidelines:
 { "Note: This person is your creator." if is_creator else "" }
 {kwargs.get('memory_context', '')[:500] if kwargs.get('memory_context') else ""}
 
-Response Mode: {mode_instructions.get(mode, mode_instructions["chat"])}
+Response Mode: {dynamic_instruction}
 """
     messages = [{"role": "system", "content": system_message}] + memory[-20:]
     messages.append({"role": "user", "content": user_prompt})
@@ -1407,6 +1404,7 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
 
         function generateAppPy() {
             const charName = document.getElementById('charName').value || "MyBot";
+            console.log('Character name for replacement:', charName);
             const safeCharName = charName.replace(/[^a-zA-Z0-9]/g, '');
             const commandPrefix = document.getElementById('command_prefix').value || '!';
             const discordUserId = document.getElementById('discord_user_id')?.value || 'YOUR_DISCORD_ID'; // Fallback
