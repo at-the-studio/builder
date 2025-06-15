@@ -1385,19 +1385,35 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
                                 throw new Error("Invalid character file - missing required fields (name or personality)");
                             }
                             
-                            document.getElementById('charName').value = charData.name || '';
-                            document.getElementById('creator').value = charData.creator || '';
-                            document.getElementById('description').value = charData.description || '';
-                            document.getElementById('personality').value = charData.personality || '';
-                            document.getElementById('scenario').value = charData.scenario || '';
-                            document.getElementById('first_mes').value = charData.first_mes || '';
-                            document.getElementById('mes_example').value = charData.mes_example || '';
-                            document.getElementById('tags').value = Array.isArray(charData.tags) ? charData.tags.join(', ') : '';
-                            document.getElementById('post_history_instructions').value = charData.post_history_instructions || '';
-                            document.getElementById('relationships').value = charData.relationships || '';
+                            // Helper function to safely set element values
+                            const setElementValue = (id, value) => {
+                                const element = document.getElementById(id);
+                                if (element) {
+                                    element.value = value || '';
+                                }
+                            };
                             
-                            if (charData.alternate_greetings && Array.isArray(charData.alternate_greetings)) {
-                                document.getElementById('alternate_greetings').value = charData.alternate_greetings.join('\\n\\n');
+                            setElementValue('charName', charData.name);
+                            setElementValue('creator', charData.creator);
+                            setElementValue('description', charData.description);
+                            setElementValue('personality', charData.personality);
+                            setElementValue('scenario', charData.scenario);
+                            setElementValue('first_mes', charData.first_mes);
+                            setElementValue('mes_example', charData.mes_example);
+                            setElementValue('tags', Array.isArray(charData.tags) ? charData.tags.join(', ') : '');
+                            setElementValue('post_history_instructions', charData.post_history_instructions);
+                            setElementValue('relationships', charData.relationships);
+                            
+                            // Import custom keywords if they exist
+                            if (charData.custom_keywords && Array.isArray(charData.custom_keywords)) {
+                                if (charData.custom_keywords[0]) {
+                                    setElementValue('keyword1_trigger', charData.custom_keywords[0].trigger);
+                                    setElementValue('keyword1_behavior', charData.custom_keywords[0].behavior);
+                                }
+                                if (charData.custom_keywords[1]) {
+                                    setElementValue('keyword2_trigger', charData.custom_keywords[1].trigger);
+                                    setElementValue('keyword2_behavior', charData.custom_keywords[1].behavior);
+                                }
                             }
                             
                             const container = document.getElementById('custom-sections-container');
