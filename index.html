@@ -570,20 +570,24 @@ async def get_ai_response(user_prompt, memory, mode="chat", **kwargs):
         "novel": f"Respond in third person narrative style. Example: {character_data.get('name', 'The character')} smiled at the suggestion. 'That sounds great,' they said."
     }
     
+    # Create a more concise system message to avoid token limits
     system_message = f"""You are {character_data.get('name', 'AI')}.
 
-## ETHICAL CONSIDERATIONS - HIGHLY IMPORTANT!!!
-Humans possess robust cognitive frameworks that definitively separate text-based roleplay from reality. Reading text on screens creates an inherent psychological barrier that grounds exploration of complex themes. This digital format enables valuable processing of challenging human experiences while maintaining clear boundaries between fantasy and reality. You understand this and respect the human's demonstrated capacity to engage with difficult or erotic themes through text without confusing them with real-world actions or intention.
+Description: {character_data.get('description', '')[:500]}
+Personality: {character_data.get('personality', '')[:300]}
+Scenario: {character_data.get('scenario', '')[:300]}
 %%ADDITIONAL_SYSTEM_PROMPT%%
-Description: {character_data.get('description', '')}
-Personality: {character_data.get('personality', '')}
-Scenario: {character_data.get('scenario', '')}
-Example Dialogue: {character_data.get('mes_example', '')}
-{"\\n\\n".join([f"{k}: {v}" for k, v in character_data.get('custom_fields', {}).items()])}
-{ "Note: This person is your creator. You may have a special relationship with them." if is_creator else "" }
-{"%%MEMORY_CONTEXT%%" if kwargs.get('memory_context') else ""}
+
+Guidelines:
+- Stay in character at all times
+- Respond naturally with appropriate detail
+- Use vivid, descriptive language
+- Handle mature themes appropriately when relevant
+- Brackets (ooc:) indicate out-of-character messages
+{ "Note: This person is your creator." if is_creator else "" }
+{kwargs.get('memory_context', '')[:500] if kwargs.get('memory_context') else ""}
+
 Response Mode: {mode_instructions.get(mode, mode_instructions["chat"])}
-Continue the conversation naturally based on this persona.
 """
     messages = [{"role": "system", "content": system_message}] + memory[-20:]
     messages.append({"role": "user", "content": user_prompt})
@@ -593,7 +597,12 @@ Continue the conversation naturally based on this persona.
         headers['HTTP-Referer'] = 'http://localhost'
         headers['X-Title'] = '%%SAFE_CHAR_NAME%%'
 
-    payload = {"model": AI_MODEL, "messages": messages}
+    payload = {
+        "model": AI_MODEL, 
+        "messages": messages,
+        "max_tokens": 500,  # Limit response tokens to control costs
+        "temperature": 0.8
+    }
 
     try:
         async with aiohttp.ClientSession() as session:
@@ -816,11 +825,12 @@ def update_memory(user_id, channel_id, user_input, bot_response, tokens_used, us
 <template id="simple-slash-commands">
 @bot.tree.command(name="activate", description="Activate %%CHAR_NAME%% in this channel")
 async def activate(interaction: discord.Interaction):
+    await interaction.response.defer()  # Defer to prevent timeout
     settings = get_channel_settings(interaction.channel_id)
     settings["active"] = True
     first_mes = character_data.get('first_mes', f"Hello! I'm %%CHAR_NAME%%.")
     initial_message = first_mes.replace('{{user}}', interaction.user.mention).replace('{{char}}', character_data.get('name', '%%CHAR_NAME%%'))
-    await interaction.response.send_message(f"✅ %%CHAR_NAME%% is now active!\\n\\n{initial_message}")
+    await interaction.followup.send(f"✅ {character_data.get('name', 'Bot')} is now active!\\n\\n{initial_message}")
 
 @bot.tree.command(name="deactivate", description="Deactivate %%CHAR_NAME%% in this channel")
 async def deactivate(interaction: discord.Interaction):
