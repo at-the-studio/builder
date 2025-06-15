@@ -521,9 +521,9 @@ channel_settings = {}
 active_channels = set()
 private_mode = {}
 
-# AI Model Parameters
-AI_TEMPERATURE = %%TEMPERATURE%%
-AI_TOP_P = %%TOP_P%%
+# AI Model Parameters (None = use API defaults)
+AI_TEMPERATURE = None
+AI_TOP_P = None
 
 channel_message_history = defaultdict(list)
 user_slash_cooldowns = defaultdict(float)
@@ -614,10 +614,14 @@ Response Mode: {dynamic_instruction}
     payload = {
         "model": AI_MODEL, 
         "messages": messages,
-        "max_tokens": 500,  # Limit response tokens to control costs
-        "temperature": AI_TEMPERATURE,
-        "top_p": AI_TOP_P
+        "max_tokens": 1000
     }
+    
+    # Only add temperature/top_p if user has set them
+    if AI_TEMPERATURE is not None:
+        payload["temperature"] = AI_TEMPERATURE
+    if AI_TOP_P is not None:
+        payload["top_p"] = AI_TOP_P
 
     try:
         async with aiohttp.ClientSession() as session:
@@ -734,8 +738,9 @@ async def on_reaction_add(reaction, user):
 # --- INFO & HELP ---
 @bot.command(name='info')
 async def info(ctx):
-    embed = discord.Embed(title=f"%%CHAR_NAME%% Bot Information", description=f"I'm %%CHAR_NAME%%, created with the Universal Bot Builder!", color=discord.Color.blurple())
-    embed.add_field(name="Character", value=f"**Name:** %%CHAR_NAME%%\\n**Creator:** {character_data.get('creator', 'Unknown')}", inline=False)
+    char_name = character_data.get('name', '%%CHAR_NAME%%')
+    embed = discord.Embed(title=f"{char_name} Bot Information", description=f"I'm {char_name}, created with the Universal Bot Builder!", color=discord.Color.blurple())
+    embed.add_field(name="Character", value=f"**Name:** {char_name}\\n**Creator:** {character_data.get('creator', 'Unknown')}", inline=False)
     embed.add_field(name="Slash Commands", value="• `/activate`\\n• `/deactivate`\\n• `/start`\\n• `/private`\\n• `/clear`\\n• `/memory`\\n• `/temperature`\\n• `/top_p`\\n• `/model_settings`\\n• `/feedback`", inline=False)
     embed.add_field(name="Reaction Controls", value="• 💫 - Regenerate last response\\n• 🗑️ - Delete message\\n• 🔇 - Message is ignored", inline=False)
     embed.set_footer(text="Decentralized Discord AI Bot Builder ◈ Giving users control of their own data")
@@ -843,16 +848,26 @@ async def activate(interaction: discord.Interaction):
     await interaction.response.defer()  # Defer to prevent timeout
     settings = get_channel_settings(interaction.channel_id)
     settings["active"] = True
-    first_mes = character_data.get('first_mes', f"Hello! I'm %%CHAR_NAME%%.")
-    initial_message = first_mes.replace('{{user}}', interaction.user.mention).replace('{{char}}', character_data.get('name', '%%CHAR_NAME%%'))
-    await interaction.followup.send(f"💠 {character_data.get('name', 'Bot')} is now active!\\n\\n{initial_message}")
+    
+    # Get the character's name into a variable for easy use
+    char_name = character_data.get('name', '%%CHAR_NAME%%')
+    
+    # Get the initial message from your character data
+    first_mes = character_data.get('first_mes', f"Hello! I'm {{char}}.")
+    
+    # Replace placeholders in the initial message
+    initial_message = first_mes.replace('{{user}}', interaction.user.mention).replace('{{char}}', char_name)
+    
+    # Use the 'char_name' variable in the final f-string response
+    await interaction.followup.send(f"💠 {char_name} is now active!\\n\\n{initial_message}")
 
 @bot.tree.command(name="deactivate", description="Deactivate %%CHAR_NAME%% in this channel")
 async def deactivate(interaction: discord.Interaction):
     settings = get_channel_settings(interaction.channel_id)
     settings["active"] = False
     private_mode.pop(str(interaction.channel_id), None)
-    await interaction.response.send_message(f"💠 %%CHAR_NAME%% has left. Use /activate to bring me back!")
+    char_name = character_data.get('name', '%%CHAR_NAME%%')
+    await interaction.response.send_message(f"💠 {char_name} has left. Use /activate to bring me back!")
 
 @bot.tree.command(name="start", description="Start a fresh conversation")
 async def start(interaction: discord.Interaction):
@@ -870,7 +885,8 @@ async def private(interaction: discord.Interaction):
     private_mode[str(interaction.channel_id)] = str(interaction.user.id)
     settings = get_channel_settings(interaction.channel_id)
     settings["active"] = True
-    await interaction.response.send_message(f"🔒 Private mode enabled for {interaction.user.mention}. Only you can chat with %%CHAR_NAME%% here.", ephemeral=True)
+    char_name = character_data.get('name', '%%CHAR_NAME%%')
+    await interaction.response.send_message(f"🔒 Private mode enabled for {interaction.user.mention}. Only you can chat with {char_name} here.", ephemeral=True)
 
 @bot.tree.command(name="memory", description="View current memory/context")
 async def memory(interaction: discord.Interaction):
@@ -933,16 +949,26 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
 async def activate(interaction: discord.Interaction):
     settings = get_channel_settings(interaction.channel_id)
     settings["active"] = True
-    first_mes = character_data.get('first_mes', f"Hello! I'm %%CHAR_NAME%%.")
-    initial_message = first_mes.replace('{{user}}', interaction.user.mention).replace('{{char}}', character_data.get('name', '%%CHAR_NAME%%'))
-    await interaction.response.send_message(f"✅ %%CHAR_NAME%% is now active!\\n\\n{initial_message}")
+    
+    # Get the character's name into a variable for easy use
+    char_name = character_data.get('name', '%%CHAR_NAME%%')
+    
+    # Get the initial message from your character data
+    first_mes = character_data.get('first_mes', f"Hello! I'm {{char}}.")
+    
+    # Replace placeholders in the initial message
+    initial_message = first_mes.replace('{{user}}', interaction.user.mention).replace('{{char}}', char_name)
+    
+    # Use the 'char_name' variable in the final f-string response
+    await interaction.response.send_message(f"✅ {char_name} is now active!\\n\\n{initial_message}")
 
 @bot.tree.command(name="deactivate", description="Deactivate %%CHAR_NAME%% in this channel")
 async def deactivate(interaction: discord.Interaction):
     settings = get_channel_settings(interaction.channel_id)
     settings["active"] = False
     private_mode.pop(str(interaction.channel_id), None)
-    await interaction.response.send_message(f"👋 %%CHAR_NAME%% has left. Use /activate to bring me back!")
+    char_name = character_data.get('name', '%%CHAR_NAME%%')
+    await interaction.response.send_message(f"👋 {char_name} has left. Use /activate to bring me back!")
 
 @bot.tree.command(name="start", description="Archive current chat and start fresh")
 async def start(interaction: discord.Interaction):
@@ -1404,7 +1430,6 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
 
         function generateAppPy() {
             const charName = document.getElementById('charName').value || "MyBot";
-            console.log('Character name for replacement:', charName);
             const safeCharName = charName.replace(/[^a-zA-Z0-9]/g, '');
             const commandPrefix = document.getElementById('command_prefix').value || '!';
             const discordUserId = document.getElementById('discord_user_id')?.value || 'YOUR_DISCORD_ID'; // Fallback
@@ -1426,8 +1451,6 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
             finalCode = finalCode.replace(/%%SAFE_CHAR_NAME%%/g, safeCharName);
             finalCode = finalCode.replace(/%%COMMAND_PREFIX%%/g, commandPrefix);
             finalCode = finalCode.replace(/%%DISCORD_USER_ID%%/g, discordUserId);
-            finalCode = finalCode.replace(/%%TEMPERATURE%%/g, temperature);
-            finalCode = finalCode.replace(/%%TOP_P%%/g, topP);
             finalCode = finalCode.replace('%%MEMORY_MANAGEMENT_BLOCK%%', memoryBlock);
             finalCode = finalCode.replace('%%SLASH_COMMANDS_BLOCK%%', slashCommandsBlock);
             
