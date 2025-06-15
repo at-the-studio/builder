@@ -581,9 +581,9 @@ async def get_ai_response(user_prompt, memory, mode="chat", **kwargs):
     is_creator = str(kwargs.get('user_id')) == str(CREATOR_ID)
     
     mode_instructions = {
-        "dynamically follow the user's chat style and change with them. If they choose to speak in narrative third person limited perspective, and using quotation marks around dialoge and italics for thoughts, then you will also.",
-        "dynamically follow the user's chat style and change with them. If they choose to chat with you in first person as if you are chatting in a text message or onliine, then you will also.",
-        "dynamically follow the user's chat style and change with them. If they choose to chat with you in roleplay using italics for actions and dialogue in plain text, then you will also."
+        "chat": "Respond naturally in character in first person with emojis or abbreviations like brb or lol.",
+        "roleplay": "Respond in first person with actions in *asterisks*. Example: *I smile* That sounds great!",
+        "novel": f"Respond in third person narrative style. Example: {character_data.get('name', 'The character')} smiled at the suggestion. 'That sounds great,' they said."
     }
     
     # Create a more concise system message to avoid token limits
@@ -672,7 +672,7 @@ async def on_message(message):
     is_mentioned = bot.user.mentioned_in(message)
     should_respond = settings["active"] or is_mentioned or is_private_chat
     
-    if is_private_chat and str(message.author.id) != private_mode.get(str(channel_id)):
+    if is_private_chat and str(message.author.id) != private_mode.get(str(channel_id), ""):
         return
 
     if should_respond:
