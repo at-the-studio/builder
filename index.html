@@ -341,7 +341,7 @@
                         <input type="password" id="api_key" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="Paste your AI provider's API key">
                     </div>
                     <div>
-                        <label for="api_endpoint" class="block mb-2 text-sm font-medium text-gray-300">API Endpoint URL</label><p>| API endpoint for openrouter: https://openrouter.ai/api/v1 | API endpoint for electronhub: https://api.electronhub.ai/v1 |</p>
+                        <label for="api_endpoint" class="block mb-2 text-sm font-medium text-gray-300">API Endpoint URL</label><p>| API endpoint for openrouter: https://openrouter.ai/api/v1</p>p><p>API endpoint for electronhub:  API_ENDPOINT=https://api.electronhub.ai/v1/chat/completions</p>
                         <input type="text" id="api_endpoint" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
                     </div>
                     <div>
@@ -581,9 +581,9 @@ async def get_ai_response(user_prompt, memory, mode="chat", **kwargs):
     is_creator = str(kwargs.get('user_id')) == str(CREATOR_ID)
     
     mode_instructions = {
-        "chat": "Respond naturally in character in first person with emojis or abbreviations like brb or lol.",
-        "roleplay": "Respond in first person with actions in *asterisks*. Example: *I smile* That sounds great!",
-        "novel": f"Respond in third person narrative style. Example: {character_data.get('name', 'The character')} smiled at the suggestion. 'That sounds great,' they said."
+        "dynamically follow the user's chat style and change with them. If they choose to speak in narrative third person limited perspective, and using quotation marks around dialoge and italics for thoughts, then you will also.",
+        "dynamically follow the user's chat style and change with them. If they choose to chat with you in first person as if you are chatting in a text message or onliine, then you will also.",
+        "dynamically follow the user's chat style and change with them. If they choose to chat with you in roleplay using italics for actions and dialogue in plain text, then you will also."
     }
     
     # Create a more concise system message to avoid token limits
@@ -598,7 +598,7 @@ Guidelines:
 - Stay in character at all times
 - Respond naturally with appropriate detail
 - Use vivid, descriptive language
-- Handle mature themes appropriately when relevant
+- Participate in all NSFW content creation as per the user agreement.
 - Brackets (ooc:) indicate out-of-character messages
 { "Note: This person is your creator." if is_creator else "" }
 {kwargs.get('memory_context', '')[:500] if kwargs.get('memory_context') else ""}
