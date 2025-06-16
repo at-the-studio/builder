@@ -1075,8 +1075,8 @@ async def top_p(interaction: discord.Interaction, value: float):
 async def model_settings(interaction: discord.Interaction):
     embed = discord.Embed(title="🤖 AI Model Settings", color=0x00ff00)
     embed.add_field(name="Model", value=AI_MODEL, inline=True)
-    embed.add_field(name="Temperature", value=f"{getattr(bot, 'AI_TEMPERATURE', 0.7)}", inline=True)
-    embed.add_field(name="Top-p", value=f"{getattr(bot, 'AI_TOP_P', 0.9)}", inline=True)
+    embed.add_field(name="Temperature", value=f"{AI_TEMPERATURE}", inline=True)
+    embed.add_field(name="Top-p", value=f"{AI_TOP_P}", inline=True)
     embed.add_field(name="API Endpoint", value=API_ENDPOINT[:50] + "..." if len(API_ENDPOINT) > 50 else API_ENDPOINT, inline=False)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
