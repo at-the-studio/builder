@@ -420,12 +420,26 @@
                         <input type="password" id="discord_token" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="Paste your bot token here">
                     </div>
                     <div>
+                        <label for="api_provider" class="block mb-2 text-sm font-medium text-gray-300">💠AI Provider</label>
+                        <select id="api_provider" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" onchange="updateApiEndpoint()">
+                            <option value="">Select AI Provider...</option>
+                            <option value="groq">Groq (Free - Fast Llama & Mixtral models)</option>
+                            <option value="together">Together AI (Free tier - Llama & Mixtral models)</option>
+                            <option value="huggingface">Hugging Face (Free inference API)</option>
+                            <option value="cohere">Cohere (Free tier - Command models)</option>
+                            <option value="openrouter">OpenRouter (Pay-per-use - Many models)</option>
+                            <option value="electronhub">ElectronHub (Great RP support)</option>
+                            <option value="custom">Custom (Enter your own endpoint)</option>
+                        </select>
+                    </div>
+                    <div>
                         <label for="api_key" class="block mb-2 text-sm font-medium text-gray-300">💠AI Provider API Key</label>
                         <input type="password" id="api_key" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="Paste your AI provider's API key">
                     </div>
                     <div>
-                        <label for="api_endpoint" class="block mb-2 text-sm font-medium text-gray-300">💠API Endpoint URL</label><p>💠API endpoint for openrouter: https://openrouter.ai/api/v1</p><p>💠API endpoint for electronhub:  https://api.electronhub.ai/v1/chat/completions</p>
-                        <input type="text" id="api_endpoint" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5">
+                        <label for="api_endpoint" class="block mb-2 text-sm font-medium text-gray-300">💠API Endpoint URL</label>
+                        <div id="api_info" class="mb-2 text-sm text-gray-400 hidden"></div>
+                        <input type="text" id="api_endpoint" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="Select a provider above or enter custom endpoint">
                     </div>
                     <div>
                         <label for="ai_model" class="block mb-2 text-sm font-medium text-gray-300">💠AI Model</label>
@@ -1630,6 +1644,73 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
 
         function startOver() {
             window.location.reload();
+        }
+
+        function updateApiEndpoint() {
+            const provider = document.getElementById('api_provider').value;
+            const endpointInput = document.getElementById('api_endpoint');
+            const modelInput = document.getElementById('ai_model');
+            const apiInfo = document.getElementById('api_info');
+            
+            const providers = {
+                'groq': {
+                    endpoint: 'https://api.groq.com/openai/v1/chat/completions',
+                    models: 'llama-3.3-70b-versatile, llama-3.1-8b-instant, mixtral-8x7b-32768',
+                    signup: 'https://console.groq.com',
+                    info: '🔥 Free and fast! <a href="https://console.groq.com" target="_blank" class="text-indigo-400 hover:text-indigo-300">Sign up at console.groq.com</a>'
+                },
+                'together': {
+                    endpoint: 'https://api.together.xyz/v1/chat/completions',
+                    models: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo, mistralai/Mixtral-8x7B-Instruct-v0.1',
+                    signup: 'https://api.together.xyz',
+                    info: '💫 Free tier available! <a href="https://api.together.xyz" target="_blank" class="text-indigo-400 hover:text-indigo-300">Sign up at api.together.xyz</a>'
+                },
+                'huggingface': {
+                    endpoint: 'https://api-inference.huggingface.co/models/microsoft/DialoGPT-large/v1/chat/completions',
+                    models: 'microsoft/DialoGPT-large, microsoft/DialoGPT-medium, facebook/blenderbot-400M-distill',
+                    signup: 'https://huggingface.co/settings/tokens',
+                    info: '🤗 Free inference API! <a href="https://huggingface.co/settings/tokens" target="_blank" class="text-indigo-400 hover:text-indigo-300">Get User Access Token here</a><br><em>Note: Hugging Face calls it "User Access Token" instead of API key</em>'
+                },
+                'cohere': {
+                    endpoint: 'https://api.cohere.ai/v1/chat',
+                    models: 'command-r, command-r-plus, command-light',
+                    signup: 'https://dashboard.cohere.ai',
+                    info: '💬 Free tier available! <a href="https://dashboard.cohere.ai" target="_blank" class="text-indigo-400 hover:text-indigo-300">Sign up at dashboard.cohere.ai</a>'
+                },
+                'openrouter': {
+                    endpoint: 'https://openrouter.ai/api/v1/chat/completions',
+                    models: 'google/gemini-pro, anthropic/claude-3-sonnet, meta-llama/llama-3.1-70b-instruct',
+                    signup: 'https://openrouter.ai',
+                    info: '🔄 Pay-per-use with many models! <a href="https://openrouter.ai" target="_blank" class="text-indigo-400 hover:text-indigo-300">Sign up at openrouter.ai</a>'
+                },
+                'electronhub': {
+                    endpoint: 'https://api.electronhub.ai/v1/chat/completions',
+                    models: 'claude-3-5-sonnet, gpt-4o, gemini-pro',
+                    signup: 'https://electronhub.ai',
+                    info: '⚡ Great for RP! <a href="https://electronhub.ai" target="_blank" class="text-indigo-400 hover:text-indigo-300">Sign up at electronhub.ai</a>'
+                }
+            };
+            
+            if (provider && providers[provider]) {
+                endpointInput.value = providers[provider].endpoint;
+                modelInput.placeholder = `e.g., ${providers[provider].models.split(', ')[0]}`;
+                apiInfo.innerHTML = `${providers[provider].info}<br><strong>Available models:</strong> ${providers[provider].models}`;
+                apiInfo.classList.remove('hidden');
+                endpointInput.readOnly = true;
+            } else if (provider === 'custom') {
+                endpointInput.value = '';
+                endpointInput.placeholder = 'Enter your custom API endpoint';
+                modelInput.placeholder = 'Enter your model name';
+                apiInfo.innerHTML = 'Enter your own OpenAI-compatible API endpoint and model';
+                apiInfo.classList.remove('hidden');
+                endpointInput.readOnly = false;
+            } else {
+                endpointInput.value = '';
+                endpointInput.placeholder = 'Select a provider above or enter custom endpoint';
+                modelInput.placeholder = 'e.g., google/gemini-pro or llama3-8b-8192';
+                apiInfo.classList.add('hidden');
+                endpointInput.readOnly = false;
+            }
         }
 
         function toggleMemoryFields() {
