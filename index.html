@@ -50,6 +50,70 @@
         textarea {
             resize: vertical;
         }
+        
+        /* Image Lightbox Styles */
+        .tutorial-image {
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .tutorial-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .lightbox.active {
+            display: flex;
+        }
+        
+        .lightbox-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s ease;
+        }
+        
+        .lightbox-close:hover {
+            color: #ccc;
+        }
+        
+        .lightbox-caption {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white">
@@ -60,6 +124,13 @@
         <p class="text-xl mt-4 text-gray-300">Click anywhere to continue</p>
     </div>
     
+    <!-- Image Lightbox -->
+    <div id="image-lightbox" class="lightbox" onclick="closeLightbox(event)">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <img id="lightbox-image" class="lightbox-content" src="" alt="">
+        <div id="lightbox-caption" class="lightbox-caption"></div>
+    </div>
+
     <!-- Closing Screen -->
     <div id="closing-screen" class="overlay-screen">
         <div class="text-center">
@@ -246,23 +317,23 @@
                 <p class="mb-4 text-gray-400">Follow these steps to create your Discord bot and get your bot token.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="bg-gray-700 p-4 rounded-lg">
-                        <img src="assets/tutorials/llama_brain_dev_portal/1.jpg" alt="Discord Developer Portal Step 1" class="w-full rounded-lg mb-2">
+                        <img src="assets/tutorials/llama_brain_dev_portal/1.jpg" alt="Discord Developer Portal Step 1" class="w-full rounded-lg mb-2 tutorial-image" onclick="openLightbox(this, 'Step 1: Go to Discord Developer Portal')">
                         <p class="text-sm text-gray-300">Step 1: Go to Discord Developer Portal</p>
                     </div>
                     <div class="bg-gray-700 p-4 rounded-lg">
-                        <img src="assets/tutorials/llama_brain_dev_portal/2.jpg" alt="Discord Developer Portal Step 2" class="w-full rounded-lg mb-2">
+                        <img src="assets/tutorials/llama_brain_dev_portal/2.jpg" alt="Discord Developer Portal Step 2" class="w-full rounded-lg mb-2 tutorial-image" onclick="openLightbox(this, 'Step 2: Create New Application')">
                         <p class="text-sm text-gray-300">Step 2: Create New Application</p>
                     </div>
                     <div class="bg-gray-700 p-4 rounded-lg">
-                        <img src="assets/tutorials/llama_brain_dev_portal/3.jpg" alt="Discord Developer Portal Step 3" class="w-full rounded-lg mb-2">
+                        <img src="assets/tutorials/llama_brain_dev_portal/3.jpg" alt="Discord Developer Portal Step 3" class="w-full rounded-lg mb-2 tutorial-image" onclick="openLightbox(this, 'Step 3: Go to Bot Section')">
                         <p class="text-sm text-gray-300">Step 3: Go to Bot Section</p>
                     </div>
                     <div class="bg-gray-700 p-4 rounded-lg">
-                        <img src="assets/tutorials/llama_brain_dev_portal/4.jpg" alt="Discord Developer Portal Step 4" class="w-full rounded-lg mb-2">
+                        <img src="assets/tutorials/llama_brain_dev_portal/4.jpg" alt="Discord Developer Portal Step 4" class="w-full rounded-lg mb-2 tutorial-image" onclick="openLightbox(this, 'Step 4: Reset and Copy Token')">
                         <p class="text-sm text-gray-300">Step 4: Reset and Copy Token</p>
                     </div>
                     <div class="bg-gray-700 p-4 rounded-lg">
-                        <img src="assets/tutorials/llama_brain_dev_portal/5.jpg" alt="Discord Developer Portal Step 5" class="w-full rounded-lg mb-2">
+                        <img src="assets/tutorials/llama_brain_dev_portal/5.jpg" alt="Discord Developer Portal Step 5" class="w-full rounded-lg mb-2 tutorial-image" onclick="openLightbox(this, 'Step 5: Enable Message Content Intent')">
                         <p class="text-sm text-gray-300">Step 5: Enable Message Content Intent</p>
                     </div>
                 </div>
@@ -274,23 +345,23 @@
                 <p class="mb-4 text-gray-400">💠Learn how to host your bot on FPS.ms for free 24/7 hosting💠 <p>💠Alternatively, you can host your bot in your computer's command prompt, but it will only be on as long as command prompt is kept open.</p><p>💠To do this, open command prompt in your computer, type in the path to your bot folder.</p><p>💠You can find the path by opening your bot folder and highlighting the text at the top (where the URL would be if it were online)</p><p>💠Copy that, and then in command prompt, right click on the screen after you type in 'cd' to paste it, so it will look something like </p><p>💠 'cd C:\Users\MyComputerName\Desktop\mybot' and when it shows that you are in that folder, then type 'python app.py' and press enter. You can also do this in Visual Code Studio.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="bg-gray-700 p-4 rounded-lg">
-                        <img src="assets/tutorials/FPS-MS-tutorial/1B.jpg" alt="FPS.ms Tutorial Step 1" class="w-full rounded-lg mb-2">
+                        <img src="assets/tutorials/FPS-MS-tutorial/1B.jpg" alt="FPS.ms Tutorial Step 1" class="w-full rounded-lg mb-2 tutorial-image" onclick="openLightbox(this, 'Step 1: Create FPS.ms Account')">
                         <p class="text-sm text-gray-300">Step 1: Create FPS.ms Account</p>
                     </div>
                     <div class="bg-gray-700 p-4 rounded-lg">
-                        <img src="assets/tutorials/FPS-MS-tutorial/2B.jpg" alt="FPS.ms Tutorial Step 2" class="w-full rounded-lg mb-2">
+                        <img src="assets/tutorials/FPS-MS-tutorial/2B.jpg" alt="FPS.ms Tutorial Step 2" class="w-full rounded-lg mb-2 tutorial-image" onclick="openLightbox(this, 'Step 2: Create New Server')">
                         <p class="text-sm text-gray-300">Step 2: Create New Server</p>
                     </div>
                     <div class="bg-gray-700 p-4 rounded-lg">
-                        <img src="assets/tutorials/FPS-MS-tutorial/3B.jpg" alt="FPS.ms Tutorial Step 3" class="w-full rounded-lg mb-2">
+                        <img src="assets/tutorials/FPS-MS-tutorial/3B.jpg" alt="FPS.ms Tutorial Step 3" class="w-full rounded-lg mb-2 tutorial-image" onclick="openLightbox(this, 'Step 3: Upload Bot Files')">
                         <p class="text-sm text-gray-300">Step 3: Upload Bot Files</p>
                     </div>
                     <div class="bg-gray-700 p-4 rounded-lg">
-                        <img src="assets/tutorials/FPS-MS-tutorial/4B.jpg" alt="FPS.ms Tutorial Step 4" class="w-full rounded-lg mb-2">
+                        <img src="assets/tutorials/FPS-MS-tutorial/4B.jpg" alt="FPS.ms Tutorial Step 4" class="w-full rounded-lg mb-2 tutorial-image" onclick="openLightbox(this, 'Step 4: Install Dependencies')">
                         <p class="text-sm text-gray-300">Step 4: Install Dependencies</p>
                     </div>
                     <div class="bg-gray-700 p-4 rounded-lg">
-                        <img src="assets/tutorials/FPS-MS-tutorial/5B.jpg" alt="FPS.ms Tutorial Step 5" class="w-full rounded-lg mb-2">
+                        <img src="assets/tutorials/FPS-MS-tutorial/5B.jpg" alt="FPS.ms Tutorial Step 5" class="w-full rounded-lg mb-2 tutorial-image" onclick="openLightbox(this, 'Step 5: Start Your Bot')">
                         <p class="text-sm text-gray-300">Step 5: Start Your Bot</p>
                     </div>
                 </div>
@@ -2132,6 +2203,42 @@ AI_MODEL=${document.getElementById('ai_model').value}`;
             }
             
             updateCharacterPreview();
+        });
+
+        // --- IMAGE LIGHTBOX FUNCTIONS ---
+        function openLightbox(imgElement, caption) {
+            const lightbox = document.getElementById('image-lightbox');
+            const lightboxImage = document.getElementById('lightbox-image');
+            const lightboxCaption = document.getElementById('lightbox-caption');
+            
+            lightboxImage.src = imgElement.src;
+            lightboxImage.alt = imgElement.alt;
+            lightboxCaption.textContent = caption || imgElement.alt;
+            
+            lightbox.classList.add('active');
+            
+            // Prevent body scrolling when lightbox is open
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeLightbox(event) {
+            // Only close if clicking the background or close button, not the image
+            if (event && event.target.id !== 'image-lightbox' && event.target.className !== 'lightbox-close') {
+                return;
+            }
+            
+            const lightbox = document.getElementById('image-lightbox');
+            lightbox.classList.remove('active');
+            
+            // Restore body scrolling
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close lightbox with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeLightbox();
+            }
         });
 
     </script>
