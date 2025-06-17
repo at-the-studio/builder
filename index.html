@@ -242,7 +242,7 @@
 
             <!-- Section 2: Discord Developer Portal Tutorial -->
             <section>
-                <h2 class="text-2xl font-bold mb-2 text-indigo-400">2. Discord Developer Portal Setup</h2>
+                <h2 class="text-2xl font-bold mb-2 text-indigo-400">💠Discord Developer Portal Setup💠</h2>
                 <p class="mb-4 text-gray-400">Follow these steps to create your Discord bot and get your bot token.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="bg-gray-700 p-4 rounded-lg">
@@ -268,10 +268,10 @@
                 </div>
             </section>
 
-            <!-- Section 3: FPS.ms Hosting Tutorial -->
+            <!-- FPS.ms Hosting Tutorial -->
             <section>
-                <h2 class="text-2xl font-bold mb-2 text-indigo-400">3. FPS.ms Hosting Setup</h2>
-                <p class="mb-4 text-gray-400">Learn how to host your bot on FPS.ms for free 24/7 hosting. Alternatively, you can host your bot in your computer's command prompt, but it will only be on as long as command prompt is kept open. To do this, open command prompt in your computer, type in the path to your bot folder. You can find the path by opening your bot folder and highlighting the text at the top (where the URL would be if it were online) copy that, and then in command prompt, right click on the screen after you type in 'cd' - so it will look something like 'cd C:\Users\MyComputerName\Desktop\mybot' and when it shows you are in that folder then type python app.py and press enter. You can also do this in Visual Code Studio.</p>
+                <h2 class="text-2xl font-bold mb-2 text-indigo-400">💠FPS.ms Hosting Setup💠</h2>
+                <p class="mb-4 text-gray-400">💠Learn how to host your bot on FPS.ms for free 24/7 hosting💠 <p>💠Alternatively, you can host your bot in your computer's command prompt, but it will only be on as long as command prompt is kept open.</p><p>💠To do this, open command prompt in your computer, type in the path to your bot folder.</p><p>💠You can find the path by opening your bot folder and highlighting the text at the top (where the URL would be if it were online)</p><p>💠Copy that, and then in command prompt, right click on the screen after you type in 'cd' to paste it, so it will look something like </p><p>💠 'cd C:\Users\MyComputerName\Desktop\mybot' and when it shows that you are in that folder, then type 'python app.py' and press enter. You can also do this in Visual Code Studio.</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div class="bg-gray-700 p-4 rounded-lg">
                         <img src="assets/tutorials/FPS-MS-tutorial/1B.jpg" alt="FPS.ms Tutorial Step 1" class="w-full rounded-lg mb-2">
@@ -502,11 +502,82 @@ import time
 # --- CONFIGURATION ---
 load_dotenv()
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-API_KEY = os.getenv('API_KEY')
-API_ENDPOINT = os.getenv('API_ENDPOINT', 'https://openrouter.ai/api/v1/chat/completions')
-AI_MODEL = os.getenv('AI_MODEL', 'google/gemini-pro')
 CHARACTER_FILE = 'character.json'
 CREATOR_ID = '%%DISCORD_USER_ID%%'
+
+# --- DYNAMIC API CONFIGURATION ---
+API_PROVIDERS = {
+    "zukijourney": {
+        "name": "ZukiJourney",
+        "endpoint": "https://api.zukijourney.com/v1/chat/completions",
+        "models": ["zukigm-1", "gpt-4o-mini", "claude-3-haiku", "gemini-1.5-flash"],
+        "signup_url": "https://zukijourney.com",
+        "rp_friendly": True
+    },
+    "electronhub": {
+        "name": "ElectronHub", 
+        "endpoint": "https://api.electronhub.ai/v1/chat/completions",
+        "models": ["gpt-4", "claude-3-sonnet", "llama-3.1-70b"],
+        "signup_url": "https://electronhub.ai",
+        "rp_friendly": True
+    },
+    "nagaai": {
+        "name": "NagaAI",
+        "endpoint": "https://api.naga.ac/v1/chat/completions", 
+        "models": ["gpt-4", "claude-3", "gemini-pro"],
+        "signup_url": "https://naga.ac",
+        "rp_friendly": True
+    },
+    "openrouter": {
+        "name": "OpenRouter",
+        "endpoint": "https://openrouter.ai/api/v1/chat/completions",
+        "models": ["google/gemini-pro", "anthropic/claude-3", "openai/gpt-4"],
+        "signup_url": "https://openrouter.ai",
+        "rp_friendly": False
+    },
+    "custom": {
+        "name": "Custom",
+        "endpoint": "",
+        "models": [],
+        "signup_url": "",
+        "rp_friendly": True
+    }
+}
+
+def load_bot_config():
+    """Load API configuration from bot_config.json or fallback to .env"""
+    config = {
+        "api_key": os.getenv('API_KEY'),
+        "api_endpoint": os.getenv('API_ENDPOINT', 'https://openrouter.ai/api/v1/chat/completions'),
+        "ai_model": os.getenv('AI_MODEL', 'google/gemini-pro'),
+        "provider": "openrouter"
+    }
+    
+    try:
+        if os.path.exists('bot_config.json'):
+            with open('bot_config.json', 'r') as f:
+                saved_config = json.load(f)
+                config.update(saved_config)
+    except Exception as e:
+        print(f"Error loading bot config: {e}")
+    
+    return config
+
+def save_bot_config(config):
+    """Save API configuration to bot_config.json"""
+    try:
+        with open('bot_config.json', 'w') as f:
+            json.dump(config, f, indent=2)
+        return True
+    except Exception as e:
+        print(f"Error saving bot config: {e}")
+        return False
+
+# Load current configuration
+bot_config = load_bot_config()
+API_KEY = bot_config["api_key"]
+API_ENDPOINT = bot_config["api_endpoint"]
+AI_MODEL = bot_config["ai_model"]
 
 # --- RATE LIMITING CONFIGURATION ---
 RATE_LIMIT_MESSAGES = 5
@@ -751,13 +822,25 @@ async def on_reaction_add(reaction, user):
 # --- INFO & HELP ---
 @bot.command(name='info')
 async def info(ctx):
-    char_name = character_data.get('name', '%%CHAR_NAME%%')
-    embed = discord.Embed(title=f"{char_name} Bot Information", description=f"I'm {char_name}, created with the Universal Bot Builder!", color=discord.Color.blurple())
-    embed.add_field(name="Character", value=f"**Name:** {char_name}\\n**Creator:** {character_data.get('creator', 'Unknown')}", inline=False)
-    embed.add_field(name="Slash Commands", value="• `/activate`\\n• `/deactivate`\\n• `/start`\\n• `/private`\\n• `/clear`\\n• `/memory`\\n• `/temperature`\\n• `/top_p`\\n• `/model_settings`\\n• `/feedback`", inline=False)
-    embed.add_field(name="Reaction Controls", value="• 💫 - Regenerate last response\\n• 🗑️ - Delete message\\n• 🔇 - Message is ignored", inline=False)
-    embed.set_footer(text="Decentralized Discord AI Bot Builder ◈ Giving users control of their own data")
-    await ctx.send(embed=embed)
+    info_text = """💠Commands💠
+!info - Shows this message
+/activate - Replies to every message
+/deactivate - Only replies to @mentions or replies
+/start - Begin new chat
+/clear - Clear recent messages
+/private - Private conversation
+/memory - View conversation memory
+/save_memory - Save permanent memory
+/configure_api - Setup API provider
+/switch_provider - Quick provider switch
+/test_api - Test API connection
+/api_status - View API settings
+/update_bot - Get latest features
+/temperature - Adjust creativity (0-2)
+/top_p - Adjust vocabulary (0-1)
+/model_settings - View AI settings
+/feedback - Send feedback"""
+    await ctx.send(info_text)
 
 @bot.command(name='help')
 async def help_command(ctx):
@@ -805,6 +888,19 @@ def update_memory(user_id, channel_id, user_input, bot_response, tokens_used, us
 </template>
 
 <template id="advanced-memory-block">
+# Groq import for manual memory saving
+try:
+    from groq import Groq
+    GROQ_AVAILABLE = True
+    GROQ_API_KEY = os.getenv('GROQ_API_KEY')
+    GROQ_MODEL = "llama-3.3-70b-versatile"
+    if GROQ_API_KEY:
+        groq_client = Groq(api_key=GROQ_API_KEY)
+    else:
+        GROQ_AVAILABLE = False
+except ImportError:
+    GROQ_AVAILABLE = False
+
 def get_user_memory(user_id, channel_id, for_regeneration=False, bot_message_id=None):
     active_file = f"memories/{user_id}_{channel_id}_active.json"
     summaries_file = f"memories/{user_id}_{channel_id}_summaries.json"
@@ -826,7 +922,7 @@ def get_user_memory(user_id, channel_id, for_regeneration=False, bot_message_id=
             recent_summaries = summaries[-5:]
             memory_context = "\\n\\n## Conversation History:\\n" + "\\n\\n".join([f"[{mem['date']}] {mem['summary']}" for mem in recent_summaries])
 
-    return {"memory": active_convo[-20:], "memory_context": memory_context, "user_id": user_id, "channel_id": channel_id}
+    return {"memory": active_convo[-50:], "memory_context": memory_context, "user_id": user_id, "channel_id": channel_id}
 
 def update_memory(user_id, channel_id, user_input, bot_response, tokens_used, user_msg_id, bot_msg_id, is_regeneration=False):
     active_file = f"memories/{user_id}_{channel_id}_active.json"
@@ -836,34 +932,116 @@ def update_memory(user_id, channel_id, user_input, bot_response, tokens_used, us
         with open(active_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
     else:
-        data = {"messages": [], "total_tokens": 0}
+        data = {"messages": []}
 
     if is_regeneration:
         for msg in reversed(data["messages"]):
             if msg.get("id") == bot_msg_id:
-                data["total_tokens"] -= len(msg.get("content", "").split()) # crude token estimate
                 msg["content"] = bot_response
                 break
     else:
         if user_input:
             data["messages"].append({"role": "user", "content": user_input, "timestamp": datetime.now().isoformat(), "id": user_msg_id})
         data["messages"].append({"role": "assistant", "content": bot_response, "timestamp": datetime.now().isoformat(), "id": bot_msg_id})
-    
-    data["total_tokens"] += tokens_used
 
     with open(active_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
+
+async def save_memory_summary(user_id, channel_id, message_count=50):
+    """Manually save a memory summary using Groq"""
+    if not GROQ_AVAILABLE or not GROQ_API_KEY:
+        return "❌ Groq API not available. Check your GROQ_API_KEY in .env file."
+
+    active_file = f"memories/{user_id}_{channel_id}_active.json"
+    summaries_file = f"memories/{user_id}_{channel_id}_summaries.json"
+    
+    if not os.path.exists(active_file):
+        return "❌ No conversation found to save."
+    
+    with open(active_file, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    messages = data.get("messages", [])
+    if len(messages) < 5:
+        return "❌ Need at least 5 messages to create a meaningful summary."
+    
+    # Get recent messages to summarize
+    recent_messages = messages[-message_count:] if len(messages) > message_count else messages
+    
+    # Build conversation text
+    conversation = ""
+    for msg in recent_messages:
+        role = "User" if msg["role"] == "user" else "Character"
+        conversation += f"{role}: {msg['content']}\\n\\n"
+    
+    # Summary prompt
+    prompt = f"""Summarize this roleplay conversation in a detailed paragraph. Include:
+- Main story events and character interactions
+- Important relationship developments
+- Emotional moments and character growth
+- Key plot points and decisions made
+- The overall mood and flow of the conversation
+
+Write a rich, contextual summary that captures the essence of this roleplay session. Make it feel like a real memory that preserves the important story beats and character development.
+
+Conversation to summarize:
+{conversation}
+
+Summary:"""
+
+    try:
+        # Call Groq
+        completion = groq_client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that creates detailed, context-rich summaries of roleplay conversations."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=500,
+        )
+        
+        summary_text = completion.choices[0].message.content
+        
+        # Save summary
+        summary_data = {
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "summary": summary_text,
+            "message_count": len(recent_messages)
+        }
+        
+        summaries_data = {"memories": []}
+        if os.path.exists(summaries_file):
+            with open(summaries_file, 'r', encoding='utf-8') as f:
+                summaries_data = json.load(f)
+        
+        summaries_data["memories"].append(summary_data)
+        
+        with open(summaries_file, 'w', encoding='utf-8') as f:
+            json.dump(summaries_data, f, indent=2)
+        
+        # Clear the recent messages that were summarized
+        remaining_messages = messages[:-len(recent_messages)] if len(messages) > len(recent_messages) else []
+        data["messages"] = remaining_messages
+        
+        with open(active_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+        
+        return f"✅ Memory saved! Summarized {len(recent_messages)} messages."
+        
+    except Exception as e:
+        return f"❌ Failed to save memory: {str(e)}"
 </template>
         
 <template id="simple-slash-commands">
-@bot.tree.command(name="activate", description="Activate %%CHAR_NAME%% in this channel")
+@bot.tree.command(name="activate", description="Activate in this channel")
 async def activate(interaction: discord.Interaction):
     await interaction.response.defer()  # Defer to prevent timeout
     settings = get_channel_settings(interaction.channel_id)
     settings["active"] = True
     
     # Get the character's name into a variable for easy use
-    char_name = character_data.get('name', '%%CHAR_NAME%%')
+    char_name = character_data.get('name', 'AI Assistant')
     
     # Get the initial message from your character data
     first_mes = character_data.get('first_mes', f"Hello! I'm {{char}}.")
@@ -872,15 +1050,14 @@ async def activate(interaction: discord.Interaction):
     initial_message = first_mes.replace('{{user}}', interaction.user.mention).replace('{{char}}', char_name)
     
     # Use the 'char_name' variable in the final f-string response
-    await interaction.followup.send(f"💠 {char_name} is now active!\\n\\n{initial_message}")
+    await interaction.followup.send(f"💠Activated💠\n\n{initial_message}")
 
-@bot.tree.command(name="deactivate", description="Deactivate %%CHAR_NAME%% in this channel")
+@bot.tree.command(name="deactivate", description="Deactivate in this channel")
 async def deactivate(interaction: discord.Interaction):
     settings = get_channel_settings(interaction.channel_id)
     settings["active"] = False
     private_mode.pop(str(interaction.channel_id), None)
-    char_name = character_data.get('name', '%%CHAR_NAME%%')
-    await interaction.response.send_message(f"💠 {char_name} has left. Use /activate to bring me back!")
+    await interaction.response.send_message("💠Deactivated💠")
 
 @bot.tree.command(name="start", description="Start a fresh conversation")
 async def start(interaction: discord.Interaction):
@@ -898,8 +1075,7 @@ async def private(interaction: discord.Interaction):
     private_mode[str(interaction.channel_id)] = str(interaction.user.id)
     settings = get_channel_settings(interaction.channel_id)
     settings["active"] = True
-    char_name = character_data.get('name', '%%CHAR_NAME%%')
-    await interaction.response.send_message(f"🔒 Private mode enabled for {interaction.user.mention}. Only you can chat with {char_name} here.", ephemeral=True)
+    await interaction.response.send_message("💠Private: Channel locked💠", ephemeral=True)
 
 @bot.tree.command(name="memory", description="View current memory/context")
 async def memory(interaction: discord.Interaction):
@@ -910,7 +1086,7 @@ async def memory(interaction: discord.Interaction):
     if key in user_memories and user_memories[key]:
         recent_count = min(5, len(user_memories[key]))
         recent_messages = user_memories[key][-recent_count:]
-        memory_text = "\\n".join([f"**{msg['role'].title()}:** {msg['content'][:100]}..." if len(msg['content']) > 100 else f"**{msg['role'].title()}:** {msg['content']}" for msg in recent_messages])
+        memory_text = "\n".join([f"**{msg['role'].title()}:** {msg['content'][:100]}..." if len(msg['content']) > 100 else f"**{msg['role'].title()}:** {msg['content']}" for msg in recent_messages])
         
         embed = discord.Embed(title="💭 Recent Memory", description=memory_text, color=0x5865F2)
         embed.set_footer(text=f"Showing last {recent_count} messages")
@@ -947,6 +1123,130 @@ async def model_settings(interaction: discord.Interaction):
     embed.add_field(name="API Endpoint", value=API_ENDPOINT[:50] + "..." if len(API_ENDPOINT) > 50 else API_ENDPOINT, inline=False)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
+# --- API CONFIGURATION MODALS ---
+class APIConfigModal(discord.ui.Modal, title='Configure API Settings'):
+    api_key = discord.ui.TextInput(label='API Key', style=discord.TextStyle.short, max_length=200, required=True, placeholder="Enter your API key...")
+    endpoint = discord.ui.TextInput(label='API Endpoint', style=discord.TextStyle.short, max_length=300, required=True, placeholder="https://api.example.com/v1/chat/completions")
+    model = discord.ui.TextInput(label='AI Model', style=discord.TextStyle.short, max_length=100, required=True, placeholder="gpt-4")
+
+    async def on_submit(self, interaction: discord.Interaction):
+        global bot_config, API_KEY, API_ENDPOINT, AI_MODEL
+        
+        bot_config.update({
+            "api_key": self.api_key.value,
+            "api_endpoint": self.endpoint.value,
+            "ai_model": self.model.value,
+            "provider": "custom"
+        })
+        
+        if save_bot_config(bot_config):
+            API_KEY = bot_config["api_key"]
+            API_ENDPOINT = bot_config["api_endpoint"] 
+            AI_MODEL = bot_config["ai_model"]
+            await interaction.response.send_message("✅ API configuration updated successfully!", ephemeral=True)
+        else:
+            await interaction.response.send_message("❌ Failed to save configuration.", ephemeral=True)
+
+class ProviderSelectView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=300)
+        
+    @discord.ui.select(
+        placeholder="Choose an API provider...",
+        options=[
+            discord.SelectOption(label="ZukiJourney", description="RP-friendly, supports GPT-4 & Claude", value="zukijourney", emoji="🚀"),
+            discord.SelectOption(label="ElectronHub", description="RP-friendly, multiple models", value="electronhub", emoji="⚡"),
+            discord.SelectOption(label="NagaAI", description="RP-friendly, successor to ChimeraGPT", value="nagaai", emoji="🐍"),
+            discord.SelectOption(label="OpenRouter", description="Commercial service, many models", value="openrouter", emoji="🔄"),
+            discord.SelectOption(label="Custom", description="Enter your own endpoint", value="custom", emoji="🛠️")
+        ]
+    )
+    async def select_provider(self, interaction: discord.Interaction, select: discord.ui.Select):
+        provider_key = select.values[0]
+        provider = API_PROVIDERS[provider_key]
+        
+        if provider_key == "custom":
+            await interaction.response.send_modal(APIConfigModal())
+        else:
+            # Show provider info and ask for API key
+            embed = discord.Embed(
+                title=f"🔧 Configure {provider['name']}", 
+                description=f"Get your free API key at: {provider['signup_url']}\n\n**Recommended Models:**\n" + "\n".join([f"• {model}" for model in provider['models'][:3]]),
+                color=0x00ff00 if provider['rp_friendly'] else 0xffaa00
+            )
+            embed.add_field(name="RP-Friendly", value="✅ Yes" if provider['rp_friendly'] else "⚠️ Limited", inline=True)
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+
+@bot.tree.command(name="configure_api", description="Configure API provider and settings")
+async def configure_api(interaction: discord.Interaction):
+    if str(interaction.user.id) != str(CREATOR_ID):
+        await interaction.response.send_message("❌ Only the bot creator can configure API settings.", ephemeral=True)
+        return
+    
+    embed = discord.Embed(
+        title="🔧 API Configuration", 
+        description="Choose an API provider to configure your bot's AI service.",
+        color=0x5865F2
+    )
+    view = ProviderSelectView()
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+@bot.tree.command(name="switch_provider", description="Quick switch between configured providers")  
+async def switch_provider(interaction: discord.Interaction):
+    if str(interaction.user.id) != str(CREATOR_ID):
+        await interaction.response.send_message("❌ Only the bot creator can switch providers.", ephemeral=True)
+        return
+        
+    view = ProviderSelectView()
+    await interaction.response.send_message("🔄 **Quick Provider Switch**", view=view, ephemeral=True)
+
+@bot.tree.command(name="test_api", description="Test current API connection")
+async def test_api(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    
+    try:
+        test_response, tokens = await get_ai_response("Say 'API test successful!' in a creative way.", memory=[], user_id=interaction.user.id, channel_id=interaction.channel.id)
+        
+        embed = discord.Embed(title="✅ API Test Successful", color=0x00ff00)
+        embed.add_field(name="Provider", value=bot_config.get('provider', 'Unknown'), inline=True)
+        embed.add_field(name="Model", value=AI_MODEL, inline=True)
+        embed.add_field(name="Tokens Used", value=str(tokens), inline=True)
+        embed.add_field(name="Response", value=test_response[:200] + "..." if len(test_response) > 200 else test_response, inline=False)
+        
+        await interaction.followup.send(embed=embed, ephemeral=True)
+    except Exception as e:
+        embed = discord.Embed(title="❌ API Test Failed", description=f"Error: {str(e)}", color=0xff0000)
+        embed.add_field(name="Current Endpoint", value=API_ENDPOINT, inline=False)
+        embed.add_field(name="Current Model", value=AI_MODEL, inline=False)
+        await interaction.followup.send(embed=embed, ephemeral=True)
+
+@bot.tree.command(name="api_status", description="View current API configuration")
+async def api_status(interaction: discord.Interaction):
+    provider_name = API_PROVIDERS.get(bot_config.get('provider', 'unknown'), {}).get('name', 'Unknown')
+    
+    embed = discord.Embed(title="📊 API Status", color=0x5865F2)
+    embed.add_field(name="Provider", value=provider_name, inline=True)
+    embed.add_field(name="Model", value=AI_MODEL, inline=True)
+    embed.add_field(name="Endpoint", value=API_ENDPOINT[:50] + "..." if len(API_ENDPOINT) > 50 else API_ENDPOINT, inline=False)
+    embed.add_field(name="API Key", value="Configured ✅" if API_KEY else "Missing ❌", inline=True)
+    
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+@bot.tree.command(name="update_bot", description="Get latest bot features and updates")
+async def update_bot(interaction: discord.Interaction):
+    embed = discord.Embed(
+        title="🔧 Bot Updates Available!",
+        description="Get the latest features, bug fixes, and improvements for your bot!",
+        color=0x00ff00
+    )
+    embed.add_field(name="What's New", value="• Self-configuring API system\n• Multiple provider support\n• Enhanced memory management\n• Better roleplay features", inline=False)
+    embed.add_field(name="How to Update", value="1. Visit the builder\n2. Import your character\n3. Download updated files\n4. Replace your bot files", inline=False)
+    
+    view = discord.ui.View()
+    view.add_item(discord.ui.Button(label="🚀 Go to Bot Builder", url="https://mjladiosa.github.io/builder/", style=discord.ButtonStyle.link))
+    
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
 @bot.tree.command(name="feedback", description="Submit beta testing feedback")
 async def feedback(interaction: discord.Interaction):
     await interaction.response.send_modal(FeedbackModal())
@@ -964,7 +1264,7 @@ async def activate(interaction: discord.Interaction):
     settings["active"] = True
     
     # Get the character's name into a variable for easy use
-    char_name = character_data.get('name', '%%CHAR_NAME%%')
+    char_name = character_data.get('name', 'AI Assistant')
     
     # Get the initial message from your character data
     first_mes = character_data.get('first_mes', f"Hello! I'm {{char}}.")
@@ -973,15 +1273,14 @@ async def activate(interaction: discord.Interaction):
     initial_message = first_mes.replace('{{user}}', interaction.user.mention).replace('{{char}}', char_name)
     
     # Use the 'char_name' variable in the final f-string response
-    await interaction.response.send_message(f"✅ {char_name} is now active!\\n\\n{initial_message}")
+    await interaction.response.send_message(f"💠Activated💠\n\n{initial_message}")
 
-@bot.tree.command(name="deactivate", description="Deactivate %%CHAR_NAME%% in this channel")
+@bot.tree.command(name="deactivate", description="Deactivate in this channel")
 async def deactivate(interaction: discord.Interaction):
     settings = get_channel_settings(interaction.channel_id)
     settings["active"] = False
     private_mode.pop(str(interaction.channel_id), None)
-    char_name = character_data.get('name', '%%CHAR_NAME%%')
-    await interaction.response.send_message(f"👋 {char_name} has left. Use /activate to bring me back!")
+    await interaction.response.send_message("💠Deactivated💠")
 
 @bot.tree.command(name="start", description="Archive current chat and start fresh")
 async def start(interaction: discord.Interaction):
@@ -1013,8 +1312,8 @@ async def private(interaction: discord.Interaction):
     thread_name = f"Private chat with {interaction.user.name}"
     try:
         thread = await interaction.channel.create_thread(name=thread_name, auto_archive_duration=1440, type=discord.ChannelType.private_thread)
-        await thread.send(f"🔒 Private conversation started!\\n\\n{character_data.get('first_mes', 'Hello!')}")
-        await interaction.response.send_message(f"✅ Created private thread: {thread.mention}", ephemeral=True)
+        await thread.send(f"🔒 Private conversation started!\n\n{character_data.get('first_mes', 'Hello!')}")
+        await interaction.response.send_message("💠Private: Channel locked💠", ephemeral=True)
         get_channel_settings(thread.id)["active"] = True
     except Exception as e:
         await interaction.response.send_message(f"❌ Failed to create private thread: {e}", ephemeral=True)
@@ -1079,6 +1378,86 @@ async def model_settings(interaction: discord.Interaction):
     embed.add_field(name="Top-p", value=f"{AI_TOP_P}", inline=True)
     embed.add_field(name="API Endpoint", value=API_ENDPOINT[:50] + "..." if len(API_ENDPOINT) > 50 else API_ENDPOINT, inline=False)
     await interaction.response.send_message(embed=embed, ephemeral=True)
+
+@bot.tree.command(name="save_memory", description="Save recent conversation as a permanent memory")
+async def save_memory(interaction: discord.Interaction, message_count: int = 50):
+    await interaction.response.defer(ephemeral=True)
+    
+    user_id = interaction.user.id
+    channel_id = interaction.channel.id
+    
+    result = await save_memory_summary(user_id, channel_id, message_count)
+    await interaction.followup.send(result, ephemeral=True)
+
+@bot.tree.command(name="configure_api", description="Configure API provider and settings")
+async def configure_api(interaction: discord.Interaction):
+    if str(interaction.user.id) != str(CREATOR_ID):
+        await interaction.response.send_message("❌ Only the bot creator can configure API settings.", ephemeral=True)
+        return
+    
+    embed = discord.Embed(
+        title="🔧 API Configuration", 
+        description="Choose an API provider to configure your bot's AI service.",
+        color=0x5865F2
+    )
+    view = ProviderSelectView()
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+
+@bot.tree.command(name="switch_provider", description="Quick switch between configured providers")  
+async def switch_provider(interaction: discord.Interaction):
+    if str(interaction.user.id) != str(CREATOR_ID):
+        await interaction.response.send_message("❌ Only the bot creator can switch providers.", ephemeral=True)
+        return
+        
+    view = ProviderSelectView()
+    await interaction.response.send_message("🔄 **Quick Provider Switch**", view=view, ephemeral=True)
+
+@bot.tree.command(name="test_api", description="Test current API connection")
+async def test_api(interaction: discord.Interaction):
+    await interaction.response.defer(ephemeral=True)
+    
+    try:
+        test_response, tokens = await get_ai_response("Say 'API test successful!' in a creative way.", memory=[], user_id=interaction.user.id, channel_id=interaction.channel.id)
+        
+        embed = discord.Embed(title="✅ API Test Successful", color=0x00ff00)
+        embed.add_field(name="Provider", value=bot_config.get('provider', 'Unknown'), inline=True)
+        embed.add_field(name="Model", value=AI_MODEL, inline=True)
+        embed.add_field(name="Tokens Used", value=str(tokens), inline=True)
+        embed.add_field(name="Response", value=test_response[:200] + "..." if len(test_response) > 200 else test_response, inline=False)
+        
+        await interaction.followup.send(embed=embed, ephemeral=True)
+    except Exception as e:
+        embed = discord.Embed(title="❌ API Test Failed", description=f"Error: {str(e)}", color=0xff0000)
+        embed.add_field(name="Current Endpoint", value=API_ENDPOINT, inline=False)
+        embed.add_field(name="Current Model", value=AI_MODEL, inline=False)
+        await interaction.followup.send(embed=embed, ephemeral=True)
+
+@bot.tree.command(name="api_status", description="View current API configuration")
+async def api_status(interaction: discord.Interaction):
+    provider_name = API_PROVIDERS.get(bot_config.get('provider', 'unknown'), {}).get('name', 'Unknown')
+    
+    embed = discord.Embed(title="📊 API Status", color=0x5865F2)
+    embed.add_field(name="Provider", value=provider_name, inline=True)
+    embed.add_field(name="Model", value=AI_MODEL, inline=True)
+    embed.add_field(name="Endpoint", value=API_ENDPOINT[:50] + "..." if len(API_ENDPOINT) > 50 else API_ENDPOINT, inline=False)
+    embed.add_field(name="API Key", value="Configured ✅" if API_KEY else "Missing ❌", inline=True)
+    
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+@bot.tree.command(name="update_bot", description="Get latest bot features and updates")
+async def update_bot(interaction: discord.Interaction):
+    embed = discord.Embed(
+        title="🔧 Bot Updates Available!",
+        description="Get the latest features, bug fixes, and improvements for your bot!",
+        color=0x00ff00
+    )
+    embed.add_field(name="What's New", value="• Self-configuring API system\n• Multiple provider support\n• Enhanced memory management\n• Better roleplay features", inline=False)
+    embed.add_field(name="How to Update", value="1. Visit the builder\n2. Import your character\n3. Download updated files\n4. Replace your bot files", inline=False)
+    
+    view = discord.ui.View()
+    view.add_item(discord.ui.Button(label="🚀 Go to Bot Builder", url="https://mjladiosa.github.io/builder/", style=discord.ButtonStyle.link))
+    
+    await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
 @bot.tree.command(name="feedback", description="Submit beta testing feedback")
 async def feedback(interaction: discord.Interaction):
@@ -1174,8 +1553,8 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
             
             if (advancedRadio.checked) {
                 groqSetup.classList.remove('hidden');
-                fileCount.textContent = '5';
-                if (memoryDownloadBtn) memoryDownloadBtn.style.display = 'inline-block';
+                fileCount.textContent = '4';
+                if (memoryDownloadBtn) memoryDownloadBtn.style.display = 'none';
             } else {
                 groqSetup.classList.add('hidden');
                 fileCount.textContent = '4';
