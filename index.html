@@ -613,6 +613,13 @@ API_PROVIDERS = {
         "signup_url": "https://openrouter.ai",
         "rp_friendly": True
     },
+    "electronhub": {
+        "name": "ElectronHub",
+        "endpoint": "https://api.electronhub.ai/v1/chat/completions",
+        "models": ["claude-3-5-sonnet", "gpt-4o", "gemini-pro"],
+        "signup_url": "https://electronhub.ai",
+        "rp_friendly": True
+    },
     "custom": {
         "name": "Custom",
         "endpoint": "",
@@ -1237,6 +1244,7 @@ class ProviderSelectView(discord.ui.View):
             discord.SelectOption(label="Hugging Face", description="Free inference API, open models", value="huggingface", emoji="🤗"),
             discord.SelectOption(label="Cohere", description="Free tier, Command models", value="cohere", emoji="💬"),
             discord.SelectOption(label="OpenRouter", description="Pay-per-use, many models", value="openrouter", emoji="🔄"),
+            discord.SelectOption(label="ElectronHub", description="AI models with great RP support", value="electronhub", emoji="🌟"),
             discord.SelectOption(label="Custom", description="Enter your own endpoint", value="custom", emoji="🛠️")
         ]
     )
