@@ -507,33 +507,40 @@ CREATOR_ID = '%%DISCORD_USER_ID%%'
 
 # --- DYNAMIC API CONFIGURATION ---
 API_PROVIDERS = {
-    "zukijourney": {
-        "name": "ZukiJourney",
-        "endpoint": "https://api.zukijourney.com/v1/chat/completions",
-        "models": ["zukigm-1", "gpt-4o-mini", "claude-3-haiku", "gemini-1.5-flash"],
-        "signup_url": "https://zukijourney.com",
+    "groq": {
+        "name": "Groq",
+        "endpoint": "https://api.groq.com/openai/v1/chat/completions",
+        "models": ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"],
+        "signup_url": "https://console.groq.com",
         "rp_friendly": True
     },
-    "electronhub": {
-        "name": "ElectronHub", 
-        "endpoint": "https://api.electronhub.ai/v1/chat/completions",
-        "models": ["gpt-4", "claude-3-sonnet", "llama-3.1-70b"],
-        "signup_url": "https://electronhub.ai",
+    "together": {
+        "name": "Together AI",
+        "endpoint": "https://api.together.xyz/v1/chat/completions",
+        "models": ["meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo", "meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo", "mistralai/Mixtral-8x7B-Instruct-v0.1"],
+        "signup_url": "https://api.together.xyz",
         "rp_friendly": True
     },
-    "nagaai": {
-        "name": "NagaAI",
-        "endpoint": "https://api.naga.ac/v1/chat/completions", 
-        "models": ["gpt-4", "claude-3", "gemini-pro"],
-        "signup_url": "https://naga.ac",
+    "huggingface": {
+        "name": "Hugging Face",
+        "endpoint": "https://api-inference.huggingface.co/models/microsoft/DialoGPT-large/v1/chat/completions",
+        "models": ["microsoft/DialoGPT-large", "microsoft/DialoGPT-medium", "facebook/blenderbot-400M-distill"],
+        "signup_url": "https://huggingface.co/settings/tokens",
+        "rp_friendly": True
+    },
+    "cohere": {
+        "name": "Cohere",
+        "endpoint": "https://api.cohere.ai/v1/chat",
+        "models": ["command-r", "command-r-plus", "command-light"],
+        "signup_url": "https://dashboard.cohere.ai",
         "rp_friendly": True
     },
     "openrouter": {
         "name": "OpenRouter",
         "endpoint": "https://openrouter.ai/api/v1/chat/completions",
-        "models": ["google/gemini-pro", "anthropic/claude-3", "openai/gpt-4"],
+        "models": ["google/gemini-pro", "anthropic/claude-3-sonnet", "meta-llama/llama-3.1-70b-instruct"],
         "signup_url": "https://openrouter.ai",
-        "rp_friendly": False
+        "rp_friendly": True
     },
     "custom": {
         "name": "Custom",
@@ -1154,10 +1161,11 @@ class ProviderSelectView(discord.ui.View):
     @discord.ui.select(
         placeholder="Choose an API provider...",
         options=[
-            discord.SelectOption(label="ZukiJourney", description="RP-friendly, supports GPT-4 & Claude", value="zukijourney", emoji="🚀"),
-            discord.SelectOption(label="ElectronHub", description="RP-friendly, multiple models", value="electronhub", emoji="⚡"),
-            discord.SelectOption(label="NagaAI", description="RP-friendly, successor to ChimeraGPT", value="nagaai", emoji="🐍"),
-            discord.SelectOption(label="OpenRouter", description="Commercial service, many models", value="openrouter", emoji="🔄"),
+            discord.SelectOption(label="Groq", description="Free, fast Llama & Mixtral models", value="groq", emoji="⚡"),
+            discord.SelectOption(label="Together AI", description="Free tier, Llama & Mixtral models", value="together", emoji="🤝"),
+            discord.SelectOption(label="Hugging Face", description="Free inference API, open models", value="huggingface", emoji="🤗"),
+            discord.SelectOption(label="Cohere", description="Free tier, Command models", value="cohere", emoji="💬"),
+            discord.SelectOption(label="OpenRouter", description="Pay-per-use, many models", value="openrouter", emoji="🔄"),
             discord.SelectOption(label="Custom", description="Enter your own endpoint", value="custom", emoji="🛠️")
         ]
     )
