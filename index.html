@@ -2232,19 +2232,10 @@ aiohttp`;
         }
         
         function generateEnvFile() {
-            const memoryType = document.querySelector('input[name="memory_type"]:checked').value;
-            const groqKey = document.getElementById('groq_api_key')?.value || '';
-            
             let envContent = `DISCORD_TOKEN=${document.getElementById('discord_token').value}
 API_KEY=${document.getElementById('api_key').value}
 API_ENDPOINT=${document.getElementById('api_endpoint').value}
 AI_MODEL=${document.getElementById('ai_model').value}`;
-
-            if (memoryType === 'advanced') {
-                envContent += `\nGROQ_API_KEY=${groqKey}`;
-            } else {
-                envContent += `\n# GROQ_API_KEY=`;
-            }
             
             return envContent;
         }
