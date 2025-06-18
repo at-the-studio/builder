@@ -234,6 +234,10 @@
                         <textarea id="post_history_instructions" rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Keep responses short and playful. Focus on emotional connection."></textarea>
                     </div>
                     <div>
+                        <label for="system_prompt" class="block mb-2 text-sm font-medium text-gray-300">💠System Prompt (Optional)</label>
+                        <textarea id="system_prompt" rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., You are a helpful assistant. Always respond in character."></textarea>
+                    </div>
+                    <div>
                         <label for="relationships" class="block mb-2 text-sm font-medium text-gray-300">💠Relationships (Optional)</label>
                         <textarea id="relationships" rows="3" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5" placeholder="e.g., Best friend: Alex\nRival: Jordan\nMentor: Dr. Smith"></textarea>
                     </div>
@@ -1949,6 +1953,7 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
                             setElementValue('mes_example', charData.mes_example);
                             setElementValue('tags', Array.isArray(charData.tags) ? charData.tags.join(', ') : '');
                             setElementValue('post_history_instructions', charData.post_history_instructions);
+                            setElementValue('system_prompt', charData.system_prompt);
                             setElementValue('relationships', charData.relationships);
                             
                             // Import custom keywords if they exist
@@ -2031,7 +2036,7 @@ class FeedbackModal(discord.ui.Modal, title='Beta Testing Feedback'):
                     first_mes: document.getElementById('first_mes').value,
                     mes_example: document.getElementById('mes_example').value,
                     creator_notes: `Created with the Universal Bot Builder.`,
-                    system_prompt: "",
+                    system_prompt: document.getElementById('system_prompt').value,
                     post_history_instructions: document.getElementById('post_history_instructions').value,
                     tags: tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(t => t) : [],
                     creator: document.getElementById('creator').value,
