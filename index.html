@@ -679,6 +679,9 @@ API_KEY = bot_config["api_key"]
 API_ENDPOINT = bot_config["api_endpoint"]
 AI_MODEL = bot_config["ai_model"]
 
+# Configuration lock to prevent API conflicts
+config_lock = asyncio.Lock()
+
 # --- RATE LIMITING CONFIGURATION ---
 RATE_LIMIT_MESSAGES = 5
 RATE_LIMIT_WINDOW = 5.0
@@ -790,13 +793,19 @@ Response Mode: {dynamic_instruction}
     messages = [{"role": "system", "content": system_message}] + memory[-20:]
     messages.append({"role": "user", "content": user_prompt})
 
-    headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
-    if 'openrouter.ai' in API_ENDPOINT:
+    # Use configuration lock to get consistent API settings
+    async with config_lock:
+        api_key = API_KEY
+        api_endpoint = API_ENDPOINT
+        ai_model = AI_MODEL
+
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    if 'openrouter.ai' in api_endpoint:
         headers['HTTP-Referer'] = 'http://localhost'
         headers['X-Title'] = '%%SAFE_CHAR_NAME%%'
 
     payload = {
-        "model": AI_MODEL, 
+        "model": ai_model, 
         "messages": messages,
         "max_tokens": 1000
     }
@@ -809,7 +818,7 @@ Response Mode: {dynamic_instruction}
 
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.post(API_ENDPOINT, headers=headers, json=payload) as response:
+            async with session.post(api_endpoint, headers=headers, json=payload) as response:
                 if response.status == 200:
                     result = await response.json()
                     raw_content = result['choices'][0]['message']['content']
@@ -1232,20 +1241,21 @@ class APIConfigModal(discord.ui.Modal, title='Configure API Settings'):
     async def on_submit(self, interaction: discord.Interaction):
         global bot_config, API_KEY, API_ENDPOINT, AI_MODEL
         
-        bot_config.update({
-            "api_key": self.api_key.value,
-            "api_endpoint": self.endpoint.value,
-            "ai_model": self.model.value,
-            "provider": "custom"
-        })
-        
-        if save_bot_config(bot_config):
-            API_KEY = bot_config["api_key"]
-            API_ENDPOINT = bot_config["api_endpoint"] 
-            AI_MODEL = bot_config["ai_model"]
-            await interaction.response.send_message("✅ API configuration updated successfully!", ephemeral=True)
-        else:
-            await interaction.response.send_message("❌ Failed to save configuration.", ephemeral=True)
+        async with config_lock:
+            bot_config.update({
+                "api_key": self.api_key.value,
+                "api_endpoint": self.endpoint.value,
+                "ai_model": self.model.value,
+                "provider": "custom"
+            })
+            
+            if save_bot_config(bot_config):
+                API_KEY = bot_config["api_key"]
+                API_ENDPOINT = bot_config["api_endpoint"] 
+                AI_MODEL = bot_config["ai_model"]
+                await interaction.response.send_message("✅ API configuration updated successfully!", ephemeral=True)
+            else:
+                await interaction.response.send_message("❌ Failed to save configuration.", ephemeral=True)
 
 class ProviderSelectView(discord.ui.View):
     def __init__(self):
