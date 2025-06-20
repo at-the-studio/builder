@@ -954,11 +954,13 @@ async def on_message(message):
                     remaining = get_trial_messages_remaining(user_id)
                     
                     # Add trial counter to response if user is on trial
-                    response_text, tokens_used = await get_ai_response(user_input, user_id=user_id, **memory_data)
+                    memory_data['user_id'] = user_id
+                    response_text, tokens_used = await get_ai_response(user_input, **memory_data)
                     if remaining > 0:
                         response_text += f"\n\n*Free messages remaining: {remaining}/5*"
                 else:
-                    response_text, tokens_used = await get_ai_response(user_input, user_id=user_id, **memory_data)
+                    memory_data['user_id'] = user_id
+                    response_text, tokens_used = await get_ai_response(user_input, **memory_data)
                 
                 async def send_response():
                     bot_message = await message.reply(response_text)
