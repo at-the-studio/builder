@@ -593,34 +593,6 @@ CREATOR_ID = '%%DISCORD_USER_ID%%'
 
 # --- DYNAMIC API CONFIGURATION ---
 API_PROVIDERS = {
-    "groq": {
-        "name": "Groq",
-        "endpoint": "https://api.groq.com/openai/v1/chat/completions",
-        "models": ["llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"],
-        "signup_url": "https://console.groq.com",
-        "rp_friendly": True
-    },
-    "together": {
-        "name": "Together AI",
-        "endpoint": "https://api.together.xyz/v1/chat/completions",
-        "models": ["meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo", "meta-llama/Llama-3.2-11B-Vision-Instruct-Turbo", "mistralai/Mixtral-8x7B-Instruct-v0.1"],
-        "signup_url": "https://api.together.xyz",
-        "rp_friendly": True
-    },
-    "huggingface": {
-        "name": "Hugging Face",
-        "endpoint": "https://api-inference.huggingface.co/models/microsoft/DialoGPT-large/v1/chat/completions",
-        "models": ["microsoft/DialoGPT-large", "microsoft/DialoGPT-medium", "facebook/blenderbot-400M-distill"],
-        "signup_url": "https://huggingface.co/settings/tokens",
-        "rp_friendly": True
-    },
-    "cohere": {
-        "name": "Cohere",
-        "endpoint": "https://api.cohere.ai/v1/chat",
-        "models": ["command-r", "command-r-plus", "command-light"],
-        "signup_url": "https://dashboard.cohere.ai",
-        "rp_friendly": True
-    },
     "openrouter": {
         "name": "OpenRouter",
         "endpoint": "https://openrouter.ai/api/v1/chat/completions",
@@ -633,13 +605,6 @@ API_PROVIDERS = {
         "endpoint": "https://api.electronhub.ai/v1/chat/completions",
         "models": ["claude-3-5-sonnet", "gpt-4o", "gemini-pro"],
         "signup_url": "https://electronhub.ai",
-        "rp_friendly": True
-    },
-    "custom": {
-        "name": "Custom",
-        "endpoint": "",
-        "models": [],
-        "signup_url": "",
         "rp_friendly": True
     }
 }
@@ -681,6 +646,66 @@ AI_MODEL = bot_config["ai_model"]
 
 # Configuration lock to prevent API conflicts
 config_lock = asyncio.Lock()
+
+# Per-user message tracking and API configuration
+user_message_counts = {}
+user_api_configs = {}
+
+def load_user_configs():
+    """Load per-user API configurations"""
+    try:
+        if os.path.exists('user_configs.json'):
+            with open('user_configs.json', 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Error loading user configs: {e}")
+    return {}
+
+def save_user_configs(configs):
+    """Save per-user API configurations"""
+    try:
+        with open('user_configs.json', 'w') as f:
+            json.dump(configs, f, indent=2)
+        return True
+    except Exception as e:
+        print(f"Error saving user configs: {e}")
+        return False
+
+def get_user_api_config(user_id):
+    """Get API configuration for a specific user"""
+    user_id_str = str(user_id)
+    if user_id_str in user_api_configs:
+        return user_api_configs[user_id_str]
+    return None
+
+def has_trial_messages_left(user_id):
+    """Check if user has trial messages remaining"""
+    user_id_str = str(user_id)
+    # Creator has unlimited messages
+    if user_id_str == str(CREATOR_ID):
+        return True
+    
+    # Check if user has their own API configured
+    if get_user_api_config(user_id):
+        return True
+        
+    # Check trial message count
+    count = user_message_counts.get(user_id_str, 0)
+    return count < 5
+
+def increment_user_message_count(user_id):
+    """Increment user's message count"""
+    user_id_str = str(user_id)
+    user_message_counts[user_id_str] = user_message_counts.get(user_id_str, 0) + 1
+
+def get_trial_messages_remaining(user_id):
+    """Get remaining trial messages for user"""
+    user_id_str = str(user_id)
+    count = user_message_counts.get(user_id_str, 0)
+    return max(0, 5 - count)
+
+# Load existing user configurations
+user_api_configs = load_user_configs()
 
 # --- RATE LIMITING CONFIGURATION ---
 RATE_LIMIT_MESSAGES = 5
@@ -793,11 +818,25 @@ Response Mode: {dynamic_instruction}
     messages = [{"role": "system", "content": system_message}] + memory[-20:]
     messages.append({"role": "user", "content": user_prompt})
 
+    # Determine which API configuration to use
+    user_id = kwargs.get('user_id')
+    user_config = None
+    
+    if user_id:
+        user_config = get_user_api_config(user_id)
+    
     # Use configuration lock to get consistent API settings
     async with config_lock:
-        api_key = API_KEY
-        api_endpoint = API_ENDPOINT
-        ai_model = AI_MODEL
+        if user_config:
+            # User has their own API configuration
+            api_key = user_config['api_key']
+            api_endpoint = user_config['api_endpoint']
+            ai_model = user_config['ai_model']
+        else:
+            # Use bot creator's API (for trial users or creator)
+            api_key = API_KEY
+            api_endpoint = API_ENDPOINT
+            ai_model = AI_MODEL
 
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
     if 'openrouter.ai' in api_endpoint:
@@ -870,13 +909,56 @@ async def on_message(message):
         return
 
     if should_respond:
+        user_id = message.author.id
+        
+        # Check if user has trial messages left or their own API
+        if not has_trial_messages_left(user_id):
+            # User has reached trial limit - show configuration prompt
+            embed = discord.Embed(
+                title="🚫 Trial Limit Reached",
+                description="You've used your 5 free messages! Configure your own API to continue chatting.",
+                color=0xff6b6b
+            )
+            
+            view = discord.ui.View(timeout=300)
+            config_button = discord.ui.Button(label="Configure API", style=discord.ButtonStyle.primary, emoji="🔧")
+            
+            async def config_callback(button_interaction):
+                if button_interaction.user.id != user_id:
+                    await button_interaction.response.send_message("This button is for the original user only.", ephemeral=True)
+                    return
+                    
+                embed = discord.Embed(
+                    title="🔧 API Configuration", 
+                    description="Choose an API provider to configure your bot's AI service.",
+                    color=0x5865F2
+                )
+                view = ProviderSelectView()
+                await button_interaction.response.send_message(embed=embed, view=view, ephemeral=True)
+            
+            config_button.callback = config_callback
+            view.add_item(config_button)
+            
+            await message.reply(embed=embed, view=view)
+            return
+        
         async with message.channel.typing():
             try:
-                user_id = message.author.id
                 memory_data = get_user_memory(user_id, channel_id)
                 user_input = message.content.replace(f'<@!{bot.user.id}>', '').replace(f'<@{bot.user.id}>', '').strip()
                 
-                response_text, tokens_used = await get_ai_response(user_input, **memory_data)
+                # Increment message count for trial users
+                user_config = get_user_api_config(user_id)
+                if not user_config and str(user_id) != str(CREATOR_ID):
+                    increment_user_message_count(user_id)
+                    remaining = get_trial_messages_remaining(user_id)
+                    
+                    # Add trial counter to response if user is on trial
+                    response_text, tokens_used = await get_ai_response(user_input, user_id=user_id, **memory_data)
+                    if remaining > 0:
+                        response_text += f"\n\n*Free messages remaining: {remaining}/5*"
+                else:
+                    response_text, tokens_used = await get_ai_response(user_input, user_id=user_id, **memory_data)
                 
                 async def send_response():
                     bot_message = await message.reply(response_text)
@@ -1234,26 +1316,45 @@ async def model_settings(interaction: discord.Interaction):
 
 # --- API CONFIGURATION MODALS ---
 class APIConfigModal(discord.ui.Modal, title='Configure API Settings'):
+    def __init__(self, provider_key=None):
+        super().__init__()
+        self.provider_key = provider_key
+        
+        # Set up fields based on provider
+        if provider_key and provider_key in API_PROVIDERS:
+            provider = API_PROVIDERS[provider_key]
+            self.endpoint.default = provider['endpoint']
+            self.model.placeholder = provider['models'][0] if provider['models'] else "Enter model name"
+        
     api_key = discord.ui.TextInput(label='API Key', style=discord.TextStyle.short, max_length=200, required=True, placeholder="Enter your API key...")
-    endpoint = discord.ui.TextInput(label='API Endpoint', style=discord.TextStyle.short, max_length=300, required=True, placeholder="https://api.example.com/v1/chat/completions")
-    model = discord.ui.TextInput(label='AI Model', style=discord.TextStyle.short, max_length=100, required=True, placeholder="gpt-4")
+    endpoint = discord.ui.TextInput(label='API Endpoint', style=discord.TextStyle.short, max_length=300, required=False, placeholder="Auto-filled based on provider")
+    model = discord.ui.TextInput(label='AI Model', style=discord.TextStyle.short, max_length=100, required=True, placeholder="Model name")
 
     async def on_submit(self, interaction: discord.Interaction):
-        global bot_config, API_KEY, API_ENDPOINT, AI_MODEL
+        # Use provider defaults if available
+        if self.provider_key and self.provider_key in API_PROVIDERS:
+            provider = API_PROVIDERS[self.provider_key]
+            endpoint = provider['endpoint']
+            provider_name = self.provider_key
+        else:
+            endpoint = self.endpoint.value or self.endpoint.placeholder
+            provider_name = "custom"
+        
+        user_id = str(interaction.user.id)
+        
+        # Save per-user configuration
+        user_config = {
+            "api_key": self.api_key.value,
+            "api_endpoint": endpoint,
+            "ai_model": self.model.value,
+            "provider": provider_name
+        }
         
         async with config_lock:
-            bot_config.update({
-                "api_key": self.api_key.value,
-                "api_endpoint": self.endpoint.value,
-                "ai_model": self.model.value,
-                "provider": "custom"
-            })
+            user_api_configs[user_id] = user_config
             
-            if save_bot_config(bot_config):
-                API_KEY = bot_config["api_key"]
-                API_ENDPOINT = bot_config["api_endpoint"] 
-                AI_MODEL = bot_config["ai_model"]
-                await interaction.response.send_message("✅ API configuration updated successfully!", ephemeral=True)
+            if save_user_configs(user_api_configs):
+                await interaction.response.send_message("✅ Your API configuration saved successfully! You can now chat unlimited.", ephemeral=True)
             else:
                 await interaction.response.send_message("❌ Failed to save configuration.", ephemeral=True)
 
@@ -1264,40 +1365,40 @@ class ProviderSelectView(discord.ui.View):
     @discord.ui.select(
         placeholder="Choose an API provider...",
         options=[
-            discord.SelectOption(label="Groq", description="Free, fast Llama & Mixtral models", value="groq", emoji="⚡"),
-            discord.SelectOption(label="Together AI", description="Free tier, Llama & Mixtral models", value="together", emoji="🤝"),
-            discord.SelectOption(label="Hugging Face", description="Free inference API, open models", value="huggingface", emoji="🤗"),
-            discord.SelectOption(label="Cohere", description="Free tier, Command models", value="cohere", emoji="💬"),
-            discord.SelectOption(label="OpenRouter", description="Pay-per-use, many models", value="openrouter", emoji="🔄"),
-            discord.SelectOption(label="ElectronHub", description="AI models with great RP support", value="electronhub", emoji="🌟"),
-            discord.SelectOption(label="Custom", description="Enter your own endpoint", value="custom", emoji="🛠️")
+            discord.SelectOption(label="OpenRouter", description="Access 100+ AI models, pay per use", value="openrouter", emoji="🌐"),
+            discord.SelectOption(label="ElectronHub", description="Optimized for roleplay & characters", value="electronhub", emoji="⚡")
         ]
     )
     async def select_provider(self, interaction: discord.Interaction, select: discord.ui.Select):
         provider_key = select.values[0]
         provider = API_PROVIDERS[provider_key]
         
-        if provider_key == "custom":
-            await interaction.response.send_modal(APIConfigModal())
-        else:
-            # Show provider info and ask for API key
-            embed = discord.Embed(
-                title=f"🔧 Configure {provider['name']}", 
-                description=f"Get your free API key at: {provider['signup_url']}\n\n**Recommended Models:**\n" + "\n".join([f"• {model}" for model in provider['models'][:3]]),
-                color=0x00ff00 if provider['rp_friendly'] else 0xffaa00
-            )
-            embed.add_field(name="RP-Friendly", value="✅ Yes" if provider['rp_friendly'] else "⚠️ Limited", inline=True)
-            await interaction.response.send_message(embed=embed, ephemeral=True)
+        # Show provider info and add "Enter API Key" button
+        embed = discord.Embed(
+            title=f"🔧 Configure {provider['name']}", 
+            description=f"1. Get your API key at: {provider['signup_url']}\n2. Click 'Enter API Key' below\n\n**Recommended Models:**\n" + "\n".join([f"• {model}" for model in provider['models'][:3]]),
+            color=0x00ff00
+        )
+        
+        # Create view with "Enter API Key" button
+        view = discord.ui.View(timeout=300)
+        button = discord.ui.Button(label="Enter API Key", style=discord.ButtonStyle.green, emoji="🔑")
+        
+        async def button_callback(button_interaction):
+            modal = APIConfigModal(provider_key=provider_key)
+            await button_interaction.response.send_modal(modal)
+        
+        button.callback = button_callback
+        view.add_item(button)
+        
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
-@bot.tree.command(name="configure_api", description="Configure API provider and settings")
+@bot.tree.command(name="configure_api", description="Configure your personal API provider and settings")
 async def configure_api(interaction: discord.Interaction):
-    if str(interaction.user.id) != str(CREATOR_ID):
-        await interaction.response.send_message("❌ Only the bot creator can configure API settings.", ephemeral=True)
-        return
     
     embed = discord.Embed(
         title="🔧 API Configuration", 
-        description="Choose an API provider to configure your bot's AI service.",
+        description="Choose an API provider to configure your personal bot access. This allows unlimited chatting with your own API key.",
         color=0x5865F2
     )
     view = ProviderSelectView()
@@ -1501,15 +1602,12 @@ async def save_memory(interaction: discord.Interaction, message_count: int = 50)
     result = await save_memory_summary(user_id, channel_id, message_count)
     await interaction.followup.send(result, ephemeral=True)
 
-@bot.tree.command(name="configure_api", description="Configure API provider and settings")
+@bot.tree.command(name="configure_api", description="Configure your personal API provider and settings")
 async def configure_api(interaction: discord.Interaction):
-    if str(interaction.user.id) != str(CREATOR_ID):
-        await interaction.response.send_message("❌ Only the bot creator can configure API settings.", ephemeral=True)
-        return
     
     embed = discord.Embed(
         title="🔧 API Configuration", 
-        description="Choose an API provider to configure your bot's AI service.",
+        description="Choose an API provider to configure your personal bot access. This allows unlimited chatting with your own API key.",
         color=0x5865F2
     )
     view = ProviderSelectView()
