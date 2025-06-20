@@ -1,4 +1,5 @@
-This is my personal project - a bot builder created by one person learning alongside you. 
+This is my personal project - a character bot creator that is set up to be decentralized, does not retain any data, no username, no password, no cookies, nothing is kept, it is all private and yours. Tje bpts ot creates are Discord Roleplay characters, and their json is compatible with Silly Tavern.
+
 It's a tool, not a polished enterprise platform. There is a community space for questions and beta testing, but understand this is a blueprint for you to embark on your own journey, not a corporate service.
 <img src="https://raw.githubusercontent.com/mjladiosa/builder/refs/heads/main/assets/openingandclosingcredits/botbuilderopeningscene.jpg"></img>
 
