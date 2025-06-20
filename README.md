@@ -1,7 +1,7 @@
 This is my personal project - a bot builder created by one person learning alongside you. 
 It's a tool, not a polished enterprise platform. There is a community space for questions and beta testing, but understand this is a blueprint for you to embark on your own journey, not a corporate service.
+<img src="https://raw.githubusercontent.com/mjladiosa/builder/refs/heads/main/assets/openingandclosingcredits/botbuilderopeningscene.jpg"></img>
 
-# Llama Brain's AI Bot Builder
 ## __What Makes This Unique__ 
 
 * 100% FREE forever
