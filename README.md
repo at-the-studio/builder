@@ -1,5 +1,5 @@
 This is my personal project - a bot builder created by one person learning alongside you. 
-It's a tool, not a polished enterprise platform. There is a community space for questions and beta testing, but understand this is a collaborative journey, not a corporate service.
+It's a tool, not a polished enterprise platform. There is a community space for questions and beta testing, but understand this is a blueprint for you to embark on your own journey, not a corporate service.
 
 # Llama Brain's AI Bot Builder
 ## __What Makes This Unique__ 
