@@ -10,6 +10,7 @@ It's a tool, not a polished enterprise platform. There is a community space for 
 * Modifiable bot code under NC-BY-CC license
 * ZERO user data collection
 * Prioritizes your privacy and creative freedom
+* Silly tavern compatible character.json
 
 ## The Only Promises
 
