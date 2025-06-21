@@ -31,6 +31,6 @@ Licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 Interna
 
 ## Support
 
-* Beta testing community available, find links in the bot builder or here: https://maybejmaybe.com/llamabrain-tools
+* Beta testing community available, find links in the bot builder or here https://discord.gg/wgyT65V9Yy
 * 
 **Remember: This is a collaborative tool, not a professional service. Your creativity and feedback help mold its future.**
